@@ -10,7 +10,9 @@ export async function assignUsernamesToExistingUsers() {
     // Find all users without usernames
     const usersWithoutUsernames = await prisma.user.findMany({
       where: {
-        username: null
+        username: {
+          equals: null
+        }
       }
     })
 
@@ -65,7 +67,11 @@ export async function assignUsernamesToExistingUsers() {
 export async function ensureAllUsersHaveUsernames() {
   try {
     const usersWithoutUsernames = await prisma.user.findMany({
-      where: { username: null },
+      where: { 
+        username: {
+          equals: null
+        }
+      },
       select: { id: true }
     })
 
