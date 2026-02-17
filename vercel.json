@@ -1,0 +1,50 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": [
+    {
+      "key": "DATABASE_URL",
+      "description": "PostgreSQL connection string",
+      "required": true
+    },
+    {
+      "key": "JWT_SECRET",
+      "description": "JWT signing secret for authentication",
+      "required": true
+    },
+    {
+      "key": "JWT_REFRESH_SECRET",
+      "description": "JWT refresh token secret",
+      "required": true
+    },
+    {
+      "key": "RESEND_API_KEY",
+      "description": "Resend API key for sending emails",
+      "required": true
+    },
+    {
+      "key": "EMAIL_FROM",
+      "description": "Sender email address for notifications",
+      "required": true
+    },
+    {
+      "key": "VERIFICATION_EMAIL",
+      "description": "Email address for verification messages",
+      "required": true
+    },
+    {
+      "key": "NEXT_PUBLIC_APP_URL",
+      "description": "Public app URL (e.g., https://yourdomain.com)",
+      "required": true
+    },
+    {
+      "key": "NEXT_PUBLIC_WHATSAPP_NUMBER",
+      "description": "WhatsApp contact number",
+      "required": false
+    }
+  ],
+  "regions": ["iad1"],
+  "maxDuration": 30
+}
