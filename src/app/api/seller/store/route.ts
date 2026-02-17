@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
+export const dynamic = 'force-dynamic'
+
 // Get seller's store details
 export async function GET(request: NextRequest) {
   try {

@@ -242,6 +242,8 @@ function calculateRelevance(product: any, query: string): number {
   return score
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams

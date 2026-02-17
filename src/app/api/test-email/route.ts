@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendOrderConfirmationEmail } from '@/lib/emails'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const email = request.nextUrl.searchParams.get('email') || 'test@example.com'
