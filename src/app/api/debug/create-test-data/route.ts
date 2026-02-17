@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
           country: 'AL',
           city: 'Tirana',
           address: 'Demo Street 123',
+          username: 'demo_seller',
           role: 'SELLER',
           isVerified: true,
         }
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
           country: 'AL',
           city: 'Tirana',
           address: 'Myslym Shyr Street, Tirana',
+          username: 'royal_butik',
           role: 'SELLER',
           isVerified: true,
         }
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
           country: 'AL',
           city: 'Durrës',
           address: 'Demo Avenue 456',
+          username: 'demo_buyer',
           role: 'BUYER',
           isVerified: true,
         }
