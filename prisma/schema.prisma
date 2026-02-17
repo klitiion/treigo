@@ -1,0 +1,574 @@
+// Treigo Database Schema
+// PostgreSQL with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== USER & AUTH ==============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  phone         String
+  country       String    // Western Balkans only
+  city          String
+  address       String
+  
+  // Username and profile
+  username      String    @unique  // Unique username for each user
+  usernameChangedAt DateTime?      // Tracks when username was last changed (can only change once)
+  avatarUrl     String?
+  
+  role          UserRole  @default(BUYER)
+  isVerified    Boolean   @default(false)
+  verifyToken   String?
+  verifyExpires DateTime?
+  
+  // Marketing preferences
+  acceptsMarketing Boolean @default(true)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLogin     DateTime?
+  
+  // Soft delete fields
+  deletedAt     DateTime?
+  isDeleted     Boolean   @default(false)
+  
+  // Relations
+  shop          Shop?
+  orders        Order[]       @relation("BuyerOrders")
+  reviews       Review[]      @relation("ReviewAuthor")
+  receivedReviews Review[]    @relation("ReviewTarget")
+  favorites     Favorite[]
+  messages      Message[]     @relation("MessageSender")
+  receivedMessages Message[]  @relation("MessageReceiver")
+  conversationsAsUser1 Conversation[] @relation("ConversationUser1")
+  conversationsAsUser2 Conversation[] @relation("ConversationUser2")
+  productRequests ProductRequest[]
+  notificationPreferences NotificationPreference?
+  
+
+  @@index([email])
+  @@index([role])
+  @@index([isDeleted])
+}
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+// ============== SHOP ==============
+
+model Shop {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  bannerUrl   String?
+  
+  // Store Profile Info
+  storePhotoUrl String?  // Main store profile picture
+  storePhotoUploadedAt DateTime?
+  bio          String?
+  website      String?
+  
+  // Trust & Verification
+  isVerified  Boolean  @default(false)
+  trustScore  Float    @default(0)
+  totalSales  Int      @default(0)
+  totalReviews Int     @default(0)
+  
+  // Store stats
+  averageRating Float  @default(0)
+  responseTime Float?  // Average response time in hours
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  products    Product[]
+  reviews     Review[]
+  orderItems  OrderItem[]
+  conversations Conversation[]
+  
+  @@index([slug])
+  @@index([isVerified])
+}
+
+// ============== PRODUCT ==============
+
+model Product {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  title       String
+  slug        String
+  description String
+  price       Float
+  originalPrice Float?  // For showing discount
+  
+  // Categorization
+  category    ProductCategory
+  brand       String?
+  model       String?
+  sku         String?
+  
+  // Condition (Treigo Standards)
+  condition   ProductCondition
+  defects     String?           // Declared defects
+  isRepaired  Boolean           @default(false)
+  repairDetails String?
+  hasReplacedParts Boolean      @default(false)
+  replacedPartsDetails String?
+  
+  // Verification
+  verificationLevel VerificationLevel @default(PENDING)
+  verificationNotes String?
+  verifiedAt        DateTime?
+  trustBadge        Boolean      @default(false)
+  
+  // Proof documents (stored as JSON array of URLs)
+  invoiceUrl        String?
+  certificateUrl    String?
+  warrantyUrl       String?
+  customsDocUrl     String?
+  
+  // Status
+  status      ProductStatus @default(DRAFT)
+  viewCount   Int           @default(0)
+  
+  // Location
+  city        String?
+  country     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  images      ProductImage[]
+  favorites   Favorite[]
+  orderItems  OrderItem[]
+  conversations Conversation[]  @relation("ConversationProduct")
+  
+  @@unique([shopId, slug])
+  @@index([category])
+  @@index([status])
+  @@index([verificationLevel])
+  @@index([price])
+  @@index([createdAt])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  url       String
+  type      ImageType @default(GENERAL)
+  order     Int       @default(0)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([productId])
+}
+
+enum ProductCategory {
+  CLOTHING
+  SHOES
+  BAGS
+  ACCESSORIES
+  WATCHES
+  JEWELRY
+  PERFUME
+  COLLECTIBLES
+  OTHER
+}
+
+enum ProductCondition {
+  NEW           // With tags, never used
+  LIKE_NEW      // Used once or twice, no visible wear
+  GOOD          // Light wear, fully functional
+  FAIR          // Visible wear, still functional
+}
+
+enum VerificationLevel {
+  PENDING       // Not yet verified
+  LEVEL_1       // Photo check passed
+  LEVEL_2       // Document check passed
+  LEVEL_3       // Physical verification passed
+  REJECTED      // Failed verification
+}
+
+enum ProductStatus {
+  DRAFT         // Not published
+  PENDING_REVIEW // Submitted for review
+  ACTIVE        // Live and available
+  SOLD          // Sold
+  RESERVED      // Reserved by buyer
+  REMOVED       // Removed by seller/admin
+}
+
+enum ImageType {
+  GENERAL
+  FRONT
+  BACK
+  SIDE
+  BOTTOM
+  TOP
+  LOGO
+  LABEL
+  SERIAL
+  DEFECT
+  PACKAGING
+  INVOICE
+  CERTIFICATE
+  USERNAME_PROOF
+}
+
+// ============== ORDERS ==============
+
+model Order {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique @default(cuid())
+  
+  buyerId     String
+  buyer       User     @relation("BuyerOrders", fields: [buyerId], references: [id])
+  
+  status      OrderStatus @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  
+  subtotal    Float
+  shippingCost Float    @default(0)
+  total       Float
+  
+  // Shipping info
+  shippingFirstName String
+  shippingLastName String
+  shippingEmail   String
+  shippingPhone   String
+  shippingAddress String
+  shippingCity    String
+  shippingPostalCode String
+  shippingCountry String @default("Albania")
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paidAt      DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  
+  // Relations
+  items       OrderItem[]
+  reviews     Review[]
+  
+  @@index([buyerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  // Seller info stored at order time
+  sellerId  String
+  seller    Shop     @relation(fields: [sellerId], references: [id])
+  
+  price     Float
+  quantity  Int      @default(1)
+  itemStatus OrderItemStatus @default(PENDING)
+  
+  @@index([orderId])
+  @@index([productId])
+  @@index([sellerId])
+}
+
+enum OrderItemStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  DISPUTED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  DISPUTED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  CARD            // Coming soon
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// ============== REVIEWS ==============
+
+model Review {
+  id        String   @id @default(cuid())
+  
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  
+  targetId  String?  // User being reviewed (seller or buyer)
+  target    User?    @relation("ReviewTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  
+  shopId    String?
+  shop      Shop?    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  orderId   String?  // Link to the order this review is from
+  order     Order?   @relation(fields: [orderId], references: [id])
+  
+  rating    Int      // 1-5
+  title     String?
+  comment   String?
+  
+  // Review type
+  reviewType ReviewType @default(SELLER) // SELLER or BUYER
+  
+  // Aspects being rated (for detailed reviews)
+  qualityRating Int?   // 1-5
+  communicationRating Int? // 1-5
+  shippingRating Int?   // 1-5
+  
+  // Verification
+  isVerifiedPurchase Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([targetId])
+  @@index([shopId])
+  @@index([rating])
+  @@index([reviewType])
+}
+
+enum ReviewType {
+  SELLER  // Buyer reviewing seller
+  BUYER   // Seller reviewing buyer
+}
+
+// ============== FAVORITES ==============
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+// ============== MESSAGES & CONVERSATIONS ==============
+
+model Conversation {
+  id         String   @id @default(cuid())
+  
+  // Participants (buyer and seller / seller and buyer)
+  userId1    String
+  user1      User     @relation("ConversationUser1", fields: [userId1], references: [id])
+  
+  userId2    String
+  user2      User     @relation("ConversationUser2", fields: [userId2], references: [id])
+  
+  // Shop context (optional - linked to product inquiry)
+  shopId     String?
+  shop       Shop?    @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  
+  productId  String?
+  product    Product? @relation("ConversationProduct", fields: [productId], references: [id], onDelete: SetNull)
+  
+  // Product request context (optional - linked to product request)
+  requestId  String?
+  request    ProductRequest? @relation("RequestConversations", fields: [requestId], references: [id], onDelete: SetNull)
+  
+  // Metadata
+  lastMessage String?
+  lastMessageAt DateTime?
+  lastMessageBy String?
+  
+  user1UnreadCount Int @default(0)
+  user2UnreadCount Int @default(0)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relations
+  messages   Message[]
+  
+  @@unique([userId1, userId2])
+  @@index([userId1])
+  @@index([userId2])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  senderId   String
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id])
+  
+  receiverId String
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id])
+  
+  content    String
+  isRead     Boolean  @default(false)
+  readAt     DateTime?
+  
+  emailNotificationSent Boolean @default(false)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+// ============== VERIFICATION REQUESTS ==============
+
+model VerificationRequest {
+  id          String   @id @default(cuid())
+  productId   String
+  
+  // Submitted data
+  brand       String
+  model       String?
+  sku         String?
+  serialCode  String?
+  batchCode   String?
+  purchaseYear String?
+  purchasePlace String?
+  saleReason  String?
+  
+  // Photo checklist completion
+  hasAllPhotos     Boolean @default(false)
+  hasUsernameProof Boolean @default(false)
+  hasInvoice       Boolean @default(false)
+  hasCertificate   Boolean @default(false)
+  hasWarranty      Boolean @default(false)
+  
+  // Review
+  status      VerificationStatus @default(PENDING)
+  reviewNotes String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([productId])
+  @@index([status])
+}
+
+// ============== NOTIFICATION PREFERENCES ==============
+
+model NotificationPreference {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Email notification settings
+  emailChatMessages   Boolean @default(true)   // New message emails
+  emailReminderEmails Boolean @default(true)   // Order reminders, delivery notifications
+  emailMarketingEmails Boolean @default(true)  // Promotions, new product announcements
+  emailOrderUpdates   Boolean @default(true)   // Order status updates
+  emailReviewRequests Boolean @default(true)   // Requests to review products
+  emailSecurityAlerts Boolean @default(true)   // Login attempts, security changes
+  
+  // In-app notifications
+  pushNotifications   Boolean @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+enum VerificationStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  MORE_INFO_NEEDED
+}
+
+// ============== PRODUCT REQUESTS ==============
+
+model ProductRequest {
+  id          String   @id @default(cuid())
+  buyerId     String
+  buyer       User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  
+  productName String
+  productLink String?
+  productImage String?
+  description String
+  
+  status      ProductRequestStatus @default(OPEN)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations for messages in conversations with sellers
+  conversations Conversation[] @relation("RequestConversations")
+  
+  @@index([buyerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ProductRequestStatus {
+  OPEN         // Active request
+  PENDING      // Matched with sellers
+  FULFILLED    // Product found/matched
+  CLOSED       // Canceled or no longer needed
+}

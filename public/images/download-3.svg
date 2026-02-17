@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="60" viewBox="0 0 100 60" fill="none">
+<rect width="100" height="60" rx="4" fill="#006FCF"/>
+<circle cx="30" cy="30" r="8" fill="#FF5F00"/>
+<circle cx="70" cy="30" r="8" fill="#EB001B"/>
+<path d="M38 26L62 26" stroke="rgba(0,0,0,0.1)" stroke-width="8"/>
+<text x="50" y="50" font-size="9" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">AMEX</text>
+</svg>
