@@ -38,11 +38,7 @@ export async function GET(request: NextRequest) {
 
     const totalUsers = await prisma.user.count()
     const usersWithoutUsernames = await prisma.user.count({
-      where: { 
-        username: {
-          equals: null
-        }
-      }
+      where: { username: null }
     })
 
     return NextResponse.json({

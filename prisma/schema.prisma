@@ -24,7 +24,7 @@ model User {
   address       String
   
   // Username and profile
-  username      String    @unique  // Unique username for each user
+  username      String?   @unique  // Unique username for each user
   usernameChangedAt DateTime?      // Tracks when username was last changed (can only change once)
   avatarUrl     String?
   
