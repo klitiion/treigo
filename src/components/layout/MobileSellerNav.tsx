@@ -37,12 +37,12 @@ export function MobileSellerNav() {
         {/* Add Product - Primary Action */}
         <Link
           href="/seller/products/new"
-          className="flex flex-col items-center justify-center w-20 h-20 text-black hover:bg-black hover:text-white transition-colors"
+          className={`flex flex-col items-center justify-center flex-1 h-20 transition-colors ${
+            isActive('/seller/products/new') ? 'bg-gray-100 text-black' : 'text-gray-600 hover:text-black'
+          }`}
         >
-          <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center mb-1">
-            <Plus className="w-5 h-5" />
-          </div>
-          <span className="text-xs font-bold uppercase tracking-wide text-center">Add</span>
+          <Plus className="w-5 h-5 mb-1" />
+          <span className="text-xs font-bold uppercase tracking-wide">Add</span>
         </Link>
 
         {/* Dashboard */}
