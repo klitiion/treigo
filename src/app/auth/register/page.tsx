@@ -267,27 +267,27 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-white">
+      <div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 bg-white">
         <div className="max-w-md w-full">
           <div className="text-center">
-            <div className="w-16 h-16 flex items-center justify-center mx-auto mb-8">
+            <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6 sm:mb-8">
               <Check className="w-12 h-12 text-black" />
             </div>
-            <h1 className="text-3xl font-bold text-black mb-4 tracking-tight uppercase">CHECK YOUR EMAIL</h1>
-            <p className="text-gray-700 mb-8 text-sm">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 tracking-tight uppercase">CHECK YOUR EMAIL</h1>
+            <p className="text-gray-700 mb-6 sm:mb-8 text-xs sm:text-sm">
               We sent a verification code to <strong>{registeredEmail}</strong>. The code expires in 10 minutes.
             </p>
 
             {/* Verification Code Form */}
-            <form onSubmit={handleVerifyCode} className="space-y-6">
+            <form onSubmit={handleVerifyCode} className="space-y-5 sm:space-y-6">
               {error && (
-                <div className="p-4 border-l-2 border-red-600 bg-red-50 text-red-700 text-sm">
+                <div className="p-3 sm:p-4 border-l-2 border-red-600 bg-red-50 text-red-700 text-xs sm:text-sm">
                   {error}
                 </div>
               )}
 
               <div>
-                <label htmlFor="code" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                <label htmlFor="code" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                   VERIFICATION CODE (6 DIGITS)
                 </label>
                 <input
@@ -297,20 +297,20 @@ function RegisterForm() {
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="000000"
-                  className="w-full px-10 py-3 text-center text-2xl tracking-[0.3em] bg-white border-b-2 border-black focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold"
+                  className="w-full px-4 sm:px-10 py-4 sm:py-5 text-center text-xl sm:text-2xl tracking-[0.3em] bg-white border-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isVerifying || verificationCode.length !== 6}
-                className="w-full py-3 bg-black text-white font-semibold uppercase text-sm tracking-wide hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isVerifying ? 'VERIFYING...' : 'VERIFY CODE'}
               </button>
             </form>
 
-            <p className="text-gray-700 text-sm mt-8">
+            <p className="text-gray-700 text-xs sm:text-sm mt-6 sm:mt-8">
               Didn't receive the code?{' '}
               <button
                 onClick={() => setSuccess(false)}
@@ -326,34 +326,34 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-white">
+    <div className="min-h-screen py-8 sm:py-12 px-4 bg-white">
       <div className="max-w-2xl mx-auto">
         {/* Duplicate Account Alert Modal */}
         {showDuplicateAlert && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white p-8 max-w-md w-full">
-              <div className="flex justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 max-w-md w-full">
+              <div className="flex justify-center mb-4 sm:mb-6">
                 <div className="w-16 h-16 flex items-center justify-center">
                   <AlertCircle className="w-8 h-8 text-red-600" />
                 </div>
               </div>
               
-              <h2 className="text-2xl font-bold text-center text-black mb-4 uppercase">ACCOUNT EXISTS</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-center text-black mb-3 sm:mb-4 uppercase">ACCOUNT EXISTS</h2>
               
-              <p className="text-center text-gray-700 mb-8 text-sm">
+              <p className="text-center text-gray-700 mb-6 sm:mb-8 text-xs sm:text-sm">
                 {duplicateMessage}
               </p>
               
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <Link
                   href="/auth/login"
-                  className="block w-full text-center py-3 bg-black text-white font-semibold uppercase text-sm tracking-wide hover:bg-gray-800 transition-colors"
+                  className="block w-full text-center py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-800 active:scale-95 transition-all"
                 >
                   SIGN IN
                 </Link>
                 <Link
                   href="/auth/forgot-password"
-                  className="block w-full text-center py-3 border-b border-black text-black font-semibold uppercase text-sm tracking-wide hover:bg-gray-50 transition-colors"
+                  className="block w-full text-center py-3 sm:py-4 border-b-2 border-black text-black font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-50 active:scale-95 transition-all"
                 >
                   RESET PASSWORD
                 </Link>
@@ -362,7 +362,7 @@ function RegisterForm() {
                     setShowDuplicateAlert(false)
                     setDuplicateMessage('')
                   }}
-                  className="w-full py-3 text-gray-700 font-semibold uppercase text-sm tracking-wide hover:bg-gray-50 transition-colors"
+                  className="w-full py-3 sm:py-4 text-gray-700 font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-50 active:scale-95 transition-all"
                 >
                   CANCEL
                 </button>
@@ -374,7 +374,7 @@ function RegisterForm() {
         {/* Back Link */}
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 text-black mb-8 hover:underline font-semibold text-sm uppercase tracking-wide"
+          className="inline-flex items-center gap-2 text-black mb-6 sm:mb-8 hover:underline font-semibold text-xs sm:text-sm uppercase tracking-wide"
         >
           <ArrowLeft className="w-4 h-4" />
           BACK HOME
@@ -383,52 +383,52 @@ function RegisterForm() {
         {/* Main Form Container */}
         <div className="max-w-md">
           {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold text-black mb-2 uppercase tracking-tight">CREATE ACCOUNT</h1>
-            <p className="text-gray-700 text-sm">Join Trèigo to start shopping or selling</p>
+          <div className="mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-1 sm:mb-2 uppercase tracking-tight">CREATE ACCOUNT</h1>
+            <p className="text-gray-700 text-xs sm:text-sm">Join Trèigo to start shopping or selling</p>
           </div>
 
           {/* Role Selection */}
-          <div className="grid grid-cols-2 gap-4 mb-12 border-b-2 border-black pb-8">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-12 border-b-2 border-black pb-6 sm:pb-8">
             <button
               type="button"
               onClick={() => setRole('BUYER')}
-              className={`p-4 border-2 transition-all ${
+              className={`p-3 sm:p-4 border-2 transition-all active:scale-95 ${
                 role === 'BUYER' 
                   ? 'border-black bg-black text-white' 
                   : 'border-black text-black hover:bg-gray-50'
               }`}
             >
-              <User className="w-6 h-6 mx-auto mb-2" />
+              <User className="w-5 sm:w-6 h-5 sm:h-6 mx-auto mb-1 sm:mb-2" />
               <p className="font-semibold uppercase text-xs tracking-wide">Buyer</p>
             </button>
             <button
               type="button"
               onClick={() => setRole('SELLER')}
-              className={`p-4 border-2 transition-all ${
+              className={`p-3 sm:p-4 border-2 transition-all active:scale-95 ${
                 role === 'SELLER' 
                   ? 'border-black bg-black text-white' 
                   : 'border-black text-black hover:bg-gray-50'
               }`}
             >
-              <Store className="w-6 h-6 mx-auto mb-2" />
+              <Store className="w-5 sm:w-6 h-5 sm:h-6 mx-auto mb-1 sm:mb-2" />
               <p className="font-semibold uppercase text-xs tracking-wide">Seller</p>
             </button>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-8 p-4 border-l-2 border-red-600 bg-red-50 text-red-700 text-sm">
+            <div className="mb-6 sm:mb-8 p-3 sm:p-4 border-l-4 border-red-600 bg-red-50 text-red-700 text-xs sm:text-sm">
               {error}
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
             {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6">
               <div>
-                <label htmlFor="firstName" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                <label htmlFor="firstName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                   FIRST NAME *
                 </label>
                 <input
@@ -438,12 +438,12 @@ function RegisterForm() {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                   placeholder="John"
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                <label htmlFor="lastName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                   LAST NAME *
                 </label>
                 <input
@@ -453,7 +453,7 @@ function RegisterForm() {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                   placeholder="Doe"
                 />
               </div>
@@ -461,7 +461,7 @@ function RegisterForm() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+              <label htmlFor="email" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                 EMAIL *
               </label>
               <input
@@ -471,14 +471,14 @@ function RegisterForm() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                 placeholder="john@example.com"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+              <label htmlFor="phone" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                 PHONE *
               </label>
               <input
@@ -488,16 +488,16 @@ function RegisterForm() {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                 placeholder="+355 69 xxx xxxx"
               />
               <p className="text-xs text-gray-600 mt-2">Format: +355 69 or 069</p>
             </div>
 
             {/* Country & City */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6">
               <div>
-                <label htmlFor="country" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                <label htmlFor="country" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                   COUNTRY *
                 </label>
                 <select
@@ -506,7 +506,7 @@ function RegisterForm() {
                   required
                   value={formData.country}
                   onChange={handleChange}
-                  className="w-full px-0 py-2 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors"
+                  className="w-full px-0 py-2 sm:py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-sm sm:text-base"
                 >
                   {countries.map(country => (
                     <option key={country.code} value={country.code}>
@@ -516,7 +516,7 @@ function RegisterForm() {
                 </select>
               </div>
               <div>
-                <label htmlFor="city" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                <label htmlFor="city" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                   CITY *
                 </label>
                 <input
@@ -526,7 +526,7 @@ function RegisterForm() {
                   required
                   value={formData.city}
                   onChange={handleChange}
-                  className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                   placeholder="Tirana"
                 />
               </div>
@@ -534,7 +534,7 @@ function RegisterForm() {
 
             {/* Address */}
             <div>
-              <label htmlFor="address" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+              <label htmlFor="address" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                 ADDRESS *
               </label>
               <input
@@ -544,7 +544,7 @@ function RegisterForm() {
                 required
                 value={formData.address}
                 onChange={handleChange}
-                className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                 placeholder="Street address"
               />
             </div>
@@ -552,7 +552,7 @@ function RegisterForm() {
             {role === 'SELLER' && (
               <>
                 <div>
-                  <label htmlFor="storeName" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                  <label htmlFor="storeName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                     STORE NAME *
                   </label>
                   <input
@@ -562,13 +562,13 @@ function RegisterForm() {
                     required
                     value={formData.storeName}
                     onChange={handleChange}
-                    className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                     placeholder="Your store/shop name"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="businessName" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                  <label htmlFor="businessName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                     BUSINESS NAME *
                   </label>
                   <input
@@ -578,25 +578,25 @@ function RegisterForm() {
                     required
                     value={formData.businessName}
                     onChange={handleChange}
-                    className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                     placeholder="Your business/store name"
                   />
                 </div>
 
                 {/* Store Photo Upload */}
                 <div>
-                  <label htmlFor="storePhoto" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                  <label htmlFor="storePhoto" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                     STORE PHOTO (OPTIONAL)
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-black transition-colors">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-black transition-colors">
                     {storePhotoPreview ? (
                       <>
                         <img
                           src={storePhotoPreview}
                           alt="Store preview"
-                          className="w-32 h-32 mx-auto object-cover rounded mb-4"
+                          className="w-24 sm:w-32 h-24 sm:h-32 mx-auto object-cover rounded mb-3 sm:mb-4"
                         />
-                        <p className="text-sm text-gray-600 mb-2">Store photo selected</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2">Store photo selected</p>
                         <button
                           type="button"
                           onClick={() => {
@@ -610,8 +610,8 @@ function RegisterForm() {
                       </>
                     ) : (
                       <>
-                        <p className="text-sm text-gray-600 mb-2">Upload a store photo or logo</p>
-                        <label className="cursor-pointer inline-block px-4 py-2 bg-black text-white text-xs font-semibold rounded hover:bg-gray-800">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2">Upload a store photo or logo</p>
+                        <label className="cursor-pointer inline-block px-3 sm:px-4 py-2 bg-black text-white text-xs font-semibold rounded hover:bg-gray-800 active:scale-95 transition-all">
                           Choose Photo
                           <input
                             type="file"
@@ -628,7 +628,7 @@ function RegisterForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="nipt" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                  <label htmlFor="nipt" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                     NIPT (VAT ID) *
                   </label>
                   <input
@@ -638,7 +638,7 @@ function RegisterForm() {
                     required
                     value={formData.nipt}
                     onChange={handleChange}
-                    className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                     placeholder="10-digit NIPT number"
                     maxLength={10}
                   />
@@ -646,7 +646,7 @@ function RegisterForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="taxRegistration" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+                  <label htmlFor="taxRegistration" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                     TAX REGISTRATION NUMBER *
                   </label>
                   <input
@@ -656,7 +656,7 @@ function RegisterForm() {
                     required
                     value={formData.taxRegistration}
                     onChange={handleChange}
-                    className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                     placeholder="Tax registration/License number"
                   />
                   <p className="text-xs text-gray-600 mt-2">Business registration number from Albanian Registry of Businesses</p>
@@ -666,10 +666,10 @@ function RegisterForm() {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+              <label htmlFor="password" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                 PASSWORD *
               </label>
-              <div className="relative mb-4">
+              <div className="relative mb-3 sm:mb-4">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
@@ -677,13 +677,13 @@ function RegisterForm() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base pr-12"
                   placeholder="Minimum 8 characters"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black transition-colors p-2 active:scale-90"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -691,9 +691,9 @@ function RegisterForm() {
               
               {/* Password Requirements */}
               {formData.password && (
-                <div className="space-y-2 p-4 bg-gray-50 border-l-2 border-black">
+                <div className="space-y-1 sm:space-y-2 p-3 sm:p-4 bg-gray-50 border-l-2 border-black mb-4 sm:mb-6">
                   <p className="text-xs font-semibold text-black uppercase tracking-wide">PASSWORD REQUIREMENTS:</p>
-                  <ul className="space-y-2 text-xs text-gray-700">
+                  <ul className="space-y-1 sm:space-y-2 text-xs text-gray-700">
                     <li className={`flex items-center gap-2 ${formData.password.length >= 8 ? 'text-black font-semibold' : 'text-gray-600'}`}>
                       <span className={formData.password.length >= 8 ? 'text-black' : 'text-gray-400'}>✓</span>
                       At least 8 characters
@@ -717,7 +717,7 @@ function RegisterForm() {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-xs font-semibold text-black mb-3 uppercase tracking-wide">
+              <label htmlFor="confirmPassword" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
                 CONFIRM PASSWORD *
               </label>
               <input
@@ -727,7 +727,7 @@ function RegisterForm() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
                 placeholder="Re-enter password"
               />
               {formData.password && formData.confirmPassword && formData.password === formData.confirmPassword && (
@@ -746,9 +746,9 @@ function RegisterForm() {
                 name="acceptTerms"
                 checked={formData.acceptTerms}
                 onChange={handleChange}
-                className="mt-1 w-5 h-5 border-2 border-black cursor-pointer"
+                className="mt-1 w-5 h-5 border-2 border-black cursor-pointer flex-shrink-0"
               />
-              <label htmlFor="acceptTerms" className="text-xs text-gray-700 cursor-pointer leading-relaxed">
+              <label htmlFor="acceptTerms" className="text-xs sm:text-xs text-gray-700 cursor-pointer leading-relaxed">
                 I agree to Trèigo's{' '}
                 <Link href="/terms" className="text-black font-semibold hover:underline">
                   Terms of Service
@@ -769,9 +769,9 @@ function RegisterForm() {
                 name="acceptsMarketing"
                 checked={formData.acceptsMarketing}
                 onChange={handleChange}
-                className="mt-1 w-5 h-5 border-2 border-black cursor-pointer"
+                className="mt-1 w-5 h-5 border-2 border-black cursor-pointer flex-shrink-0"
               />
-              <label htmlFor="acceptsMarketing" className="text-xs text-gray-700 cursor-pointer leading-relaxed">
+              <label htmlFor="acceptsMarketing" className="text-xs sm:text-xs text-gray-700 cursor-pointer leading-relaxed">
                 Keep me updated with exclusive offers, new products, and personalized recommendations. You can change this preference anytime in your{' '}
                 <Link href="/buyer/profile" className="text-black font-semibold hover:underline">
                   account settings
@@ -784,12 +784,13 @@ function RegisterForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-black text-white font-semibold uppercase text-sm tracking-wide hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  CREATING ACCOUNT...
+                  <span className="hidden sm:inline">CREATING ACCOUNT...</span>
+                  <span className="sm:hidden">CREATING...</span>
                 </>
               ) : (
                 `CREATE ACCOUNT AS ${role === 'SELLER' ? 'SELLER' : 'BUYER'}`

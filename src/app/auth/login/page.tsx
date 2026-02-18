@@ -67,30 +67,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-24">
-        <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="w-full px-4 sm:px-6 py-8 sm:py-12 lg:py-24 flex-1 flex items-center">
+        <div className="max-w-md mx-auto w-full">
           {/* Header */}
-          <div className="mb-12">
-            <Link href="/" className="font-900 text-2xl text-black tracking-tighter mb-2">
+          <div className="mb-8 sm:mb-12">
+            <Link href="/" className="font-900 text-xl sm:text-2xl text-black tracking-tighter mb-2 block hover:opacity-70 transition-opacity">
               TRÈIGO
             </Link>
-            <h1 className="text-4xl font-900 tracking-tighter text-black mb-2">SIGN IN</h1>
-            <p className="text-gray-600 uppercase text-sm tracking-wide">Welcome back</p>
+            <h1 className="text-3xl sm:text-4xl font-900 tracking-tighter text-black mb-1 sm:mb-2">SIGN IN</h1>
+            <p className="text-gray-600 uppercase text-xs sm:text-sm tracking-wide">Welcome back</p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 border border-red-300 bg-red-50 text-red-700 text-sm">
+            <div className="mb-6 p-3 sm:p-4 border-l-4 border-red-500 bg-red-50 text-red-700 text-xs sm:text-sm">
               {error}
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6 mb-8">
+          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 mb-8">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-xs uppercase tracking-wider font-600 text-black mb-3">
+              <label htmlFor="email" className="block text-xs uppercase tracking-wider font-600 text-black mb-2 sm:mb-3">
                 Email
               </label>
               <input
@@ -100,14 +100,14 @@ export default function LoginPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                className="w-full px-4 py-3 sm:py-4 bg-white border-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-sm sm:text-base text-black placeholder:text-gray-500"
                 placeholder="your@email.com"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-xs uppercase tracking-wider font-600 text-black mb-3">
+              <label htmlFor="password" className="block text-xs uppercase tracking-wider font-600 text-black mb-2 sm:mb-3">
                 Password
               </label>
               <div className="relative">
@@ -118,15 +118,16 @@ export default function LoginPage() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                  className="w-full px-4 py-3 sm:py-4 bg-white border-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-sm sm:text-base text-black placeholder:text-gray-500 pr-12"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black transition-colors p-2 active:scale-90"
+                  aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -135,27 +136,28 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-black text-white font-900 uppercase tracking-wide hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center gap-2 text-sm"
+              className="w-full py-3 sm:py-4 bg-black text-white font-600 sm:font-700 uppercase tracking-wider text-xs sm:text-sm hover:bg-gray-900 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-75 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in
+                  <Loader2 size={18} className="animate-spin" />
+                  <span className="hidden sm:inline">Signing in...</span>
+                  <span className="sm:hidden">Signing in</span>
                 </>
               ) : (
-                'Sign in'
+                'Sign In'
               )}
             </button>
           </form>
 
           {/* Links */}
-          <div className="space-y-4 border-t border-gray-200 pt-8">
-            <Link href="/auth/forgot-password" className="block text-sm text-gray-600 hover:text-black transition-colors">
-              Forgot password?
+          <div className="space-y-3 sm:space-y-4 border-t border-gray-200 pt-6 sm:pt-8">
+            <Link href="/auth/forgot-password" className="block text-xs sm:text-sm text-gray-600 hover:text-black font-600 uppercase tracking-wide transition-colors">
+              Forgot Password?
             </Link>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link href="/auth/register" className="text-black font-600 hover:opacity-70 transition-opacity">
+              <Link href="/auth/register" className="text-black font-bold hover:opacity-70 transition-opacity">
                 Create one
               </Link>
             </p>
