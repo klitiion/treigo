@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
       acceptsMarketing = true,
     } = body
 
+    console.log('[REGISTER] Request received for email:', email)
+
     // Validate required fields
     if (!email || !password || !firstName || !lastName || !phone || !country || !city || !address) {
       return NextResponse.json(
@@ -51,12 +53,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('[REGISTER] Checking for existing user:', email)
+    
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     })
 
     if (existingUser) {
+      console.log('[REGISTER] User already exists:', email)
       return NextResponse.json(
         { error: 'This email is already registered' },
         { status: 409 }
@@ -82,6 +87,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
+    console.log('[REGISTER] Hashing password')
     const hashedPassword = await hash(password, 12)
 
     // Generate random verification token (6 digit code)
@@ -99,6 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user in database
+    console.log('[REGISTER] Creating user in database')
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
@@ -117,19 +124,20 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log(`[INFO] User created: ${user.email} with role: ${user.role}`)
+    console.log('[REGISTER] User created successfully:', user.id, user.email, user.role)
 
     // Send verification email with code
     try {
+      console.log('[REGISTER] Sending verification email to:', email)
       const emailResult = await sendVerificationEmail(email, firstName, verifyToken)
       if (!emailResult.success) {
-        console.error('Email send failed:', emailResult.error)
+        console.error('[REGISTER] Email send failed:', emailResult.error)
         // Log but don't fail - email service might be temporarily down
       } else {
-        console.log(`[INFO] Verification email sent to ${email}`)
+        console.log('[REGISTER] Verification email sent successfully to', email)
       }
     } catch (emailError) {
-      console.error('Email service error:', emailError)
+      console.error('[REGISTER] Email service error:', emailError)
       // Log but don't fail - allow registration to complete
     }
 
@@ -145,24 +153,26 @@ export async function POST(request: NextRequest) {
     )
 
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error('[REGISTER] Error caught:', error)
     
     // Detailed error logging for debugging
     let errorMessage = 'Registration failed. Please try again.'
     let detailedError = ''
     
     if (error instanceof Error) {
-      console.error('Error name:', error.name)
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
+      console.error('[REGISTER] Error type:', error.name)
+      console.error('[REGISTER] Error message:', error.message)
+      console.error('[REGISTER] Error stack:', error.stack)
       detailedError = error.message
     }
     
     // Check if it's a Prisma error
     if (error && typeof error === 'object' && 'code' in error) {
-      console.error('Prisma error code:', (error as any).code)
-      console.error('Prisma error meta:', (error as any).meta)
-      detailedError = `Prisma error ${(error as any).code}: ${(error as any).message}`
+      const prismaError = error as any
+      console.error('[REGISTER] Prisma error code:', prismaError.code)
+      console.error('[REGISTER] Prisma error meta:', prismaError.meta)
+      console.error('[REGISTER] Prisma error message:', prismaError.message)
+      detailedError = `Prisma error ${prismaError.code}: ${prismaError.message}`
     }
     
     // Return detailed error in development, generic in production
