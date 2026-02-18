@@ -200,67 +200,12 @@ export function SellerLayout({ children }: SellerLayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 pb-24 lg:pb-0">
+        <main className="flex-1">
           <div className="p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>
       </div>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black lg:hidden z-40">
-        <div className="flex items-center justify-around h-24">
-          {/* Add Product - Primary Action */}
-          <Link
-            href="/seller/products/new"
-            className="flex flex-col items-center justify-center w-20 h-20 text-black hover:bg-black hover:text-white transition-colors"
-          >
-            <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center mb-1">
-              <Plus className="w-6 h-6" />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wide text-center">Add</span>
-          </Link>
-
-          {/* Dashboard */}
-          <Link
-            href="/seller/dashboard"
-            className={`flex flex-col items-center justify-center flex-1 h-20 transition-colors ${
-              isActive('/seller/dashboard')
-                ? 'bg-gray-100 text-black'
-                : 'text-gray-600 hover:text-black'
-            }`}
-          >
-            <LayoutDashboard className="w-5 h-5 mb-1" />
-            <span className="text-xs font-bold uppercase tracking-wide">Home</span>
-          </Link>
-
-          {/* Products */}
-          <Link
-            href="/seller/products"
-            className={`flex flex-col items-center justify-center flex-1 h-20 transition-colors ${
-              isActive('/seller/products') && !isActive('/seller/products/new')
-                ? 'bg-gray-100 text-black'
-                : 'text-gray-600 hover:text-black'
-            }`}
-          >
-            <Package className="w-5 h-5 mb-1" />
-            <span className="text-xs font-bold uppercase tracking-wide">Items</span>
-          </Link>
-
-          {/* Settings */}
-          <Link
-            href="/seller/settings"
-            className={`flex flex-col items-center justify-center flex-1 h-20 transition-colors ${
-              isActive('/seller/settings')
-                ? 'bg-gray-100 text-black'
-                : 'text-gray-600 hover:text-black'
-            }`}
-          >
-            <Settings className="w-5 h-5 mb-1" />
-            <span className="text-xs font-bold uppercase tracking-wide">More</span>
-          </Link>
-        </div>
-      </nav>
     </div>
   )
 }

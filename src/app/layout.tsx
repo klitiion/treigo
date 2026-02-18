@@ -6,6 +6,7 @@ import { WhatsAppButton } from '@/components/ui/WhatsAppButton'
 import { Toaster } from '@/components/ui/Toaster'
 import { CustomCursor } from '@/components/ui/CustomCursor'
 import { CurrencyProvider } from '@/context/CurrencyContext'
+import { LayoutWrapper } from '@/components/layout/LayoutWrapper'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -39,13 +40,14 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col">
         <CustomCursor />
         <CurrencyProvider>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
+          <LayoutWrapper>
+            <Header />
+            <main className="flex-1 mobile-seller-nav-padding">
+              {children}
+            </main>
+            <Footer />
+          </LayoutWrapper>
         </CurrencyProvider>
-        <WhatsAppButton />
         <Toaster />
       </body>
     </html>
