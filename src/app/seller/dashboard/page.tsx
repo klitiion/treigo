@@ -154,27 +154,15 @@ export default function SellerDashboard() {
   }
 
   return (
-    <div className="min-h-screen py-12 bg-white">
-      <div className="container-treigo">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
-          <div>
-            <h1 className="text-4xl font-bold text-black uppercase tracking-tight">
-              WELCOME, {(user?.name || 'SELLER').toUpperCase()}
-            </h1>
-            <p className="text-gray-600 text-sm">Manage your shop and products</p>
-          </div>
-          <Link
-            href="/seller/products/new"
-            className="inline-flex items-center gap-2 px-6 py-4 bg-black text-white font-semibold uppercase tracking-wide text-sm hover:bg-gray-800 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            ADD PRODUCT
-          </Link>
-        </div>
+    <div className="bg-white">
+      <div className="mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-black uppercase tracking-tight">
+          WELCOME, {(user?.name || 'SELLER').toUpperCase()}
+        </h1>
+        <p className="text-gray-600 text-sm mt-2">Manage your shop and products</p>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="bg-white border-2 border-black p-6">
             <div className="flex items-center justify-between mb-4">
               <Package className="w-8 h-8 text-black" />
@@ -214,13 +202,13 @@ export default function SellerDashboard() {
 
         {/* Pending Verification Alert */}
         {mockStats.pendingVerification > 0 && (
-          <div className="bg-yellow-50 border-l-4 border-black p-6 mb-12 flex items-center gap-4">
+          <div className="bg-yellow-50 border-l-4 border-black p-4 sm:p-6 mb-8 sm:mb-12 flex items-center gap-4">
             <AlertCircle className="w-6 h-6 text-black flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold text-black uppercase text-sm tracking-wide">
+              <p className="font-semibold text-black uppercase text-xs sm:text-sm tracking-wide">
                 {mockStats.pendingVerification} PRODUCTS PENDING VERIFICATION
               </p>
-              <p className="text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 mt-1">
                 Verification typically takes 24-48 hours. You'll receive an email when complete.
               </p>
             </div>
@@ -338,10 +326,9 @@ export default function SellerDashboard() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white border-2 border-black p-8 max-w-md w-full">
             <div className="flex justify-center mb-6">
