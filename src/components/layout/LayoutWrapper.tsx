@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { MobileSellerNav } from './MobileSellerNav'
 import { WhatsAppButton } from '@/components/ui/WhatsAppButton'
 
@@ -11,6 +12,7 @@ interface LayoutWrapperProps {
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [isSeller, setIsSeller] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     setMounted(true)
@@ -27,12 +29,16 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     }
   }, [])
 
+  // Only show seller nav on seller pages
+  const isSellerPage = pathname?.startsWith('/seller')
+  const showSellerNav = isSeller && isSellerPage
+
   if (!mounted) return <>{children}</>
 
   return (
     <>
       {children}
-      {isSeller ? <MobileSellerNav /> : <WhatsAppButton />}
+      {showSellerNav ? <MobileSellerNav /> : <WhatsAppButton />}
     </>
   )
 }

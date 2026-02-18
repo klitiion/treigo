@@ -42,7 +42,7 @@ export default function RootLayout({
         <CurrencyProvider>
           <LayoutWrapper>
             <Header />
-            <main className="flex-1 mobile-seller-nav-padding">
+            <main className="flex-1">
               {children}
             </main>
             <Footer />

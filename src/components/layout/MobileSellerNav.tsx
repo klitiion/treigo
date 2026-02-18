@@ -12,11 +12,11 @@ export function MobileSellerNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black lg:hidden z-40">
       <div className="flex items-center justify-around h-20">
-        {/* Home */}
+        {/* Dashboard */}
         <Link
-          href="/"
+          href="/seller/dashboard"
           className={`flex flex-col items-center justify-center flex-1 h-20 transition-colors ${
-            pathname === '/' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:text-black'
+            isActive('/seller/dashboard') && !isActive('/seller/products/new') ? 'bg-gray-100 text-black' : 'text-gray-600 hover:text-black'
           }`}
         >
           <Home className="w-5 h-5 mb-1" />

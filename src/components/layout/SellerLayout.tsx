@@ -200,7 +200,7 @@ export function SellerLayout({ children }: SellerLayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1">
+        <main className="flex-1 lg:pb-0 mobile-seller-nav-padding">
           <div className="p-4 sm:p-6 lg:p-8">
             {children}
           </div>
