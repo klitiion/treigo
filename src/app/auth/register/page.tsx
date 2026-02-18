@@ -215,7 +215,12 @@ function RegisterForm() {
           setDuplicateMessage(data.error || 'Llogaria ekziston tashmë')
           setShowDuplicateAlert(true)
         } else {
-          setError(data.error || 'Dicka shkoi keq')
+          // Show detailed error in development
+          const errorMsg = data.details 
+            ? `${data.error}\n\nDetails: ${data.details}`
+            : (data.error || 'Dicka shkoi keq')
+          setError(errorMsg)
+          console.error('Registration error details:', data)
         }
         return
       }

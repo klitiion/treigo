@@ -146,8 +146,33 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Registration error:', error)
+    
+    // Detailed error logging for debugging
+    let errorMessage = 'Registration failed. Please try again.'
+    let detailedError = ''
+    
+    if (error instanceof Error) {
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      detailedError = error.message
+    }
+    
+    // Check if it's a Prisma error
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Prisma error code:', (error as any).code)
+      console.error('Prisma error meta:', (error as any).meta)
+      detailedError = `Prisma error ${(error as any).code}: ${(error as any).message}`
+    }
+    
+    // Return detailed error in development, generic in production
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    
     return NextResponse.json(
-      { error: 'Registration failed. Please try again.' },
+      { 
+        error: errorMessage,
+        ...(isDevelopment && { details: detailedError })
+      },
       { status: 500 }
     )
   }
