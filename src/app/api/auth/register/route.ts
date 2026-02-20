@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma'
 import { sendVerificationEmail } from '@/lib/email'
 import { validatePassword } from '@/lib/passwordValidator'
 
-import { generateSlug } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
@@ -15,21 +14,22 @@ export async function POST(request: NextRequest) {
       password, 
       firstName, 
       lastName, 
+      username,
       phone, 
       country, 
       city, 
       address,
-      role = 'BUYER',
+      shopName,
       businessName,
-      nipt,
-      taxRegistration,
+      taxId,
+      createShop = false,
       acceptsMarketing = true,
     } = body
 
     console.log('[REGISTER] Request received for email:', email)
 
     // Validate required fields
-    if (!email || !password || !firstName || !lastName || !phone || !country || !city || !address) {
+    if (!email || !password || !firstName || !lastName || !username || !phone || !country || !city || !address) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -41,6 +41,20 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
+    // Validate username format
+    if (username.length < 3) {
+      return NextResponse.json(
+        { error: 'Username must be at least 3 characters' },
+        { status: 400 }
+      )
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      return NextResponse.json(
+        { error: 'Username can only contain letters, numbers, hyphens, and underscores' },
         { status: 400 }
       )
     }
@@ -69,19 +83,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate seller-specific fields
-    if (role === 'SELLER') {
-      if (!businessName || !nipt || !taxRegistration) {
+    // Check if username already exists
+    if (username) {
+      const existingUsername = await prisma.user.findUnique({
+        where: { username: username }
+      })
+      if (existingUsername) {
         return NextResponse.json(
-          { error: 'Business name, NIPT, and tax registration are required for sellers' },
+          { error: 'This username is already taken' },
+          { status: 409 }
+        )
+      }
+    }
+
+    // Validate shop-specific fields if creating a shop
+    if (createShop) {
+      if (!shopName || !businessName || !taxId) {
+        return NextResponse.json(
+          { error: 'Shop name, business name, and Tax ID are required to create a shop' },
           { status: 400 }
         )
       }
       
-      // Validate NIPT format (10 digits)
-      if (!/^\d{10}$/.test(nipt.replace(/\s/g, ''))) {
+      // Validate Tax ID format (10 digits)
+      if (!/^\d{10}$/.test(taxId.replace(/\s/g, ''))) {
         return NextResponse.json(
-          { error: 'NIPT must be exactly 10 digits' },
+          { error: 'Tax ID must be exactly 10 digits' },
           { status: 400 }
         )
       }
@@ -95,14 +122,13 @@ export async function POST(request: NextRequest) {
     const verifyToken = Math.floor(100000 + Math.random() * 900000).toString()
     const verifyExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
-    // Generate random username
-    const generateUsername = () => {
-      const adjectives = ['swift', 'bright', 'keen', 'vivid', 'prime', 'noble', 'bold', 'stark', 'pure', 'wild']
-      const nouns = ['falcon', 'arrow', 'tiger', 'phoenix', 'storm', 'zephyr', 'volt', 'pulse', 'wave', 'fire']
-      const numbers = Math.floor(Math.random() * 9000) + 1000
-      const adj = adjectives[Math.floor(Math.random() * adjectives.length)]
-      const noun = nouns[Math.floor(Math.random() * nouns.length)]
-      return `${adj}${noun}${numbers}`
+    // Generate shop slug
+    const generateShopSlug = (name: string) => {
+      return name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 50)
     }
 
     // Create user in database
@@ -117,15 +143,46 @@ export async function POST(request: NextRequest) {
         country,
         city,
         address,
-        username: generateUsername(),
-        role: role === 'SELLER' ? 'SELLER' : 'BUYER',
+        username: username,
+        role: createShop ? 'SELLER' : 'BUYER',
         isVerified: false,
         verifyToken,
         verifyExpires,
+        acceptsMarketing,
       }
     })
 
     console.log('[REGISTER] User created successfully:', user.id, user.email, user.role)
+
+    // Create shop if requested
+    if (createShop) {
+      console.log('[REGISTER] Creating shop for user:', user.id)
+      const slug = generateShopSlug(shopName!)
+      
+      // Check if slug already exists
+      let finalSlug = slug
+      let counter = 1
+      while (true) {
+        const existingShop = await prisma.shop.findUnique({
+          where: { slug: finalSlug }
+        })
+        if (!existingShop) break
+        finalSlug = `${slug}-${counter}`
+        counter++
+      }
+
+      await prisma.shop.create({
+        data: {
+          userId: user.id,
+          name: shopName!,
+          slug: finalSlug,
+          description: '',
+          isVerified: false,
+          taxId: taxId,
+        }
+      })
+      console.log('[REGISTER] Shop created successfully for user:', user.id)
+    }
 
     // Send verification email with code
     try {

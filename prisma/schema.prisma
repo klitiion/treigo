@@ -88,7 +88,8 @@ model Shop {
   bio          String?
   website      String?
   
-  // Trust & Verification
+  // Verification & Legal Info
+  taxId       String?                 // TAX ID / NIPT for seller verification
   isVerified  Boolean  @default(false)
   trustScore  Float    @default(0)
   totalSales  Int      @default(0)

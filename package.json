@@ -24,6 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@react-google-maps/api": "^2.20.8",
     "autoprefixer": "^10.4.24",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",

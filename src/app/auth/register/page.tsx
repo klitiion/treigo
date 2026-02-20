@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { Eye, EyeOff, User, Store, Check, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, Check, Loader2, AlertCircle, MapPin, X } from 'lucide-react'
 import { validatePassword } from '@/lib/passwordValidator'
 
 const countries = [
@@ -17,10 +16,8 @@ const countries = [
 
 // Format phone number to +355 69 xxxx xxxx format
 const formatPhoneNumber = (phone: string): string => {
-  // Remove all non-digit characters
   const cleaned = phone.replace(/\D/g, '')
   
-  // If it starts with 355 (with country code)
   if (cleaned.startsWith('355')) {
     const last10 = cleaned.slice(3)
     if (last10.length === 9 && last10.startsWith('69')) {
@@ -28,12 +25,10 @@ const formatPhoneNumber = (phone: string): string => {
     }
   }
   
-  // If it starts with 069 (local format)
   if (cleaned.startsWith('069')) {
     return `+355 ${cleaned.slice(1, 3)} ${cleaned.slice(3, 7)} ${cleaned.slice(7)}`
   }
   
-  // If it starts with 69 (without leading 0)
   if (cleaned.startsWith('69')) {
     return `+355 ${cleaned.slice(0, 2)} ${cleaned.slice(2, 6)} ${cleaned.slice(6)}`
   }
@@ -45,13 +40,11 @@ const formatPhoneNumber = (phone: string): string => {
 const isValidAlbanianPhone = (phone: string): boolean => {
   const cleaned = phone.replace(/\D/g, '')
   
-  // Must be 9 digits for mobile (without country code) or 12 digits (with 355)
   if (cleaned.startsWith('355')) {
     const last10 = cleaned.slice(3)
     return last10.length === 9 && last10.startsWith('69')
   }
   
-  // Accept 069 or 69 formats
   if (cleaned.startsWith('069') || cleaned.startsWith('69')) {
     return cleaned.length === 10 || cleaned.length === 9
   }
@@ -59,11 +52,13 @@ const isValidAlbanianPhone = (phone: string): boolean => {
   return false
 }
 
+interface PlacePrediction {
+  description: string
+  place_id: string
+  main_text: string
+}
+
 function RegisterForm() {
-  const searchParams = useSearchParams()
-  const initialRole = searchParams.get('role') === 'seller' ? 'SELLER' : 'BUYER'
-  
-  const [role, setRole] = useState<'BUYER' | 'SELLER'>(initialRole)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -74,12 +69,19 @@ function RegisterForm() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [showDuplicateAlert, setShowDuplicateAlert] = useState(false)
   const [duplicateMessage, setDuplicateMessage] = useState('')
-  const [storePhotoFile, setStorePhotoFile] = useState<File | null>(null)
-  const [storePhotoPreview, setStorePhotoPreview] = useState<string | null>(null)
+  const [wantShop, setWantShop] = useState(false)
   
+  // Google Places autocomplete
+  const [addressSuggestions, setAddressSuggestions] = useState<PlacePrediction[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [loadingAddressSuggestions, setLoadingAddressSuggestions] = useState(false)
+  const addressInputRef = useRef<HTMLDivElement>(null)
+  let placesServiceRef = useRef<any>(null)
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -89,21 +91,92 @@ function RegisterForm() {
     address: '',
     acceptTerms: false,
     acceptsMarketing: true,
-    nipt: '', // For sellers only
-    businessName: '', // For sellers only
-    taxRegistration: '', // For sellers only
-    storeName: '', // For sellers only
+    // Shop fields
+    shopName: '',
+    taxId: '',
+    businessName: '',
   })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Initialize Google Places
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !(window as any).google) {
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAm84VWx-I7RepRrlQWR-yjcNbrzZLd-cM&libraries=places`
+      script.async = true
+      script.defer = true
+      document.head.appendChild(script)
+      
+      script.onload = () => {
+        if ((window as any).google) {
+          placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
+        }
+      }
+    } else if ((window as any).google && !placesServiceRef.current) {
+      placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
+    }
+  }, [])
+
+  // Handle address input with Google Places autocomplete
+  const handleAddressInput = useCallback(async (value: string) => {
+    setFormData(prev => ({ ...prev, address: value }))
+    setError('')
+
+    if (!value || value.length < 3) {
+      setAddressSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+
+    if (!placesServiceRef.current) return
+
+    setLoadingAddressSuggestions(true)
+    try {
+      const predictions = await placesServiceRef.current.getPlacePredictions({
+        input: value,
+        componentRestrictions: {
+          country: formData.country.toLowerCase()
+        }
+      })
+
+      if (predictions.predictions) {
+        setAddressSuggestions(predictions.predictions)
+        setShowSuggestions(true)
+      }
+    } catch (err) {
+      console.error('Error fetching address predictions:', err)
+    } finally {
+      setLoadingAddressSuggestions(false)
+    }
+  }, [formData.country])
+
+  // Handle address selection from suggestions
+  const handleAddressSelect = (prediction: PlacePrediction) => {
+    setFormData(prev => ({ ...prev, address: prediction.description }))
+    setShowSuggestions(false)
+    setAddressSuggestions([])
+  }
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (addressInputRef.current && !addressInputRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
     const inputElement = e.target as HTMLInputElement
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? inputElement.checked : value
     }))
     
-    // Update password validation when password field changes
     if (name === 'password') {
       setPasswordValidation(validatePassword(value))
     }
@@ -111,90 +184,104 @@ function RegisterForm() {
     setError('')
   }
 
-  const handleStorePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setStorePhotoFile(file)
-      
-      // Create preview
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setStorePhotoPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+  const validateForm = (): boolean => {
+    // Basic validation
+    if (!formData.firstName.trim()) {
+      setError('First name is required')
+      return false
     }
+    if (!formData.lastName.trim()) {
+      setError('Last name is required')
+      return false
+    }
+    if (!formData.username.trim()) {
+      setError('Username is required')
+      return false
+    }
+    if (formData.username.length < 3) {
+      setError('Username must be at least 3 characters')
+      return false
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(formData.username)) {
+      setError('Username can only contain letters, numbers, hyphens, and underscores')
+      return false
+    }
+    if (!formData.email.trim()) {
+      setError('Email is required')
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      setError('Invalid email format')
+      return false
+    }
+    if (!formData.password) {
+      setError('Password is required')
+      return false
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      return false
+    }
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors[0])
+      return false
+    }
+    if (!formData.phone.trim()) {
+      setError('Phone number is required')
+      return false
+    }
+    if (!isValidAlbanianPhone(formData.phone)) {
+      setError('Phone number must be in format 069 or +355 69')
+      return false
+    }
+    if (!formData.city.trim()) {
+      setError('City is required')
+      return false
+    }
+    if (!formData.address.trim()) {
+      setError('Address is required')
+      return false
+    }
+    if (!formData.acceptTerms) {
+      setError('You must accept the terms and conditions')
+      return false
+    }
+
+    // Shop validation
+    if (wantShop) {
+      if (!formData.shopName.trim()) {
+        setError('Shop name is required')
+        return false
+      }
+      if (!formData.businessName.trim()) {
+        setError('Business name is required')
+        return false
+      }
+      if (!formData.taxId.trim()) {
+        setError('Tax ID is required')
+        return false
+      }
+      if (!/^\d{10}$/.test(formData.taxId.replace(/\s/g, ''))) {
+        setError('Tax ID must be exactly 10 digits')
+        return false
+      }
+    }
+
+    return true
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setShowDuplicateAlert(false)
-    
-    // Validation
-    if (!formData.acceptTerms) {
-      setError('Duhet të pranosh termat dhe kushtet')
-      return
-    }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-    
-    // Validate password strength
-    if (!passwordValidation.isValid) {
-      setError(passwordValidation.errors[0])
-      return
-    }
-    
-    // Validate phone number
-    if (!isValidAlbanianPhone(formData.phone)) {
-      setError('Numri i telefonit duhet të jetë në formatin 069 ose +355 69')
-      return
-    }
-
-    // Seller-specific validation
-    if (role === 'SELLER') {
-      if (!formData.storeName || formData.storeName.trim() === '') {
-        setError('Store name is required for sellers')
-        return
-      }
-
-      if (!formData.businessName || formData.businessName.trim() === '') {
-        setError('Business name is required for sellers')
-        return
-      }
-      
-      if (!formData.nipt || formData.nipt.trim() === '') {
-        setError('NIPT (VAT ID) is required for sellers')
-        return
-      }
-      
-      // NIPT should be 10 digits
-      if (!/^\d{10}$/.test(formData.nipt.replace(/\s/g, ''))) {
-        setError('NIPT must be 10 digits')
-        return
-      }
-      
-      if (!formData.taxRegistration || formData.taxRegistration.trim() === '') {
-        setError('Tax registration number is required for sellers')
-        return
-      }
-    }
+    if (!validateForm()) return
 
     setIsLoading(true)
 
     try {
       const formattedPhone = formatPhoneNumber(formData.phone)
-      
-      // Convert store photo to base64 if present
-      let storePhotoUrl: string | undefined = undefined
-      if (storePhotoFile && role === 'SELLER') {
-        const buffer = await storePhotoFile.arrayBuffer()
-        const base64 = Buffer.from(buffer).toString('base64')
-        const mimeType = storePhotoFile.type || 'image/jpeg'
-        storePhotoUrl = `data:${mimeType};base64,${base64}`
-      }
       
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -202,23 +289,20 @@ function RegisterForm() {
         body: JSON.stringify({
           ...formData,
           phone: formattedPhone,
-          role,
-          ...(storePhotoUrl && { storePhotoUrl })
+          createShop: wantShop,
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        // Handle duplicate user error (409 Conflict)
         if (response.status === 409) {
-          setDuplicateMessage(data.error || 'Llogaria ekziston tashmë')
+          setDuplicateMessage(data.error || 'Account already exists')
           setShowDuplicateAlert(true)
         } else {
-          // Show detailed error in development
           const errorMsg = data.details 
             ? `${data.error}\n\nDetails: ${data.details}`
-            : (data.error || 'Dicka shkoi keq')
+            : (data.error || 'Something went wrong')
           setError(errorMsg)
           console.error('Registration error details:', data)
         }
@@ -228,7 +312,7 @@ function RegisterForm() {
       setRegisteredEmail(data.email)
       setSuccess(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Dicka shkoi keq')
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setIsLoading(false)
     }
@@ -239,7 +323,7 @@ function RegisterForm() {
     setError('')
     
     if (!verificationCode || verificationCode.length !== 6) {
-      setError('Kodi duhet të jetë 6 shifra')
+      setError('Code must be 6 digits')
       return
     }
 
@@ -251,20 +335,20 @@ function RegisterForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: registeredEmail,
-          code: verificationCode,
+          verifyToken: verificationCode,
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Kodi nuk është i saktë')
+        setError(data.error || 'Verification failed')
+        return
       }
 
-      // Redirect to login after successful verification
       window.location.href = '/auth/login?verified=true'
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Dicka shkoi keq')
+      setError(err instanceof Error ? err.message : 'Verification failed')
     } finally {
       setIsVerifying(false)
     }
@@ -272,56 +356,64 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 bg-white">
-        <div className="max-w-md w-full">
-          <div className="text-center">
-            <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6 sm:mb-8">
-              <Check className="w-12 h-12 text-black" />
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="border-2 border-black p-8 mb-6">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-green-50 border-2 border-green-600 rounded-full flex items-center justify-center">
+                <Check className="w-8 h-8 text-green-600" />
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 tracking-tight uppercase">CHECK YOUR EMAIL</h1>
-            <p className="text-gray-700 mb-6 sm:mb-8 text-xs sm:text-sm">
-              We sent a verification code to <strong>{registeredEmail}</strong>. The code expires in 10 minutes.
+            <h2 className="text-2xl font-bold text-center text-black mb-4 uppercase tracking-wider">
+              Verify Your Email
+            </h2>
+            <p className="text-center text-gray-700 mb-6 text-sm">
+              We've sent a 6-digit code to <strong>{registeredEmail}</strong>. Please enter it below to verify your account.
             </p>
 
-            {/* Verification Code Form */}
-            <form onSubmit={handleVerifyCode} className="space-y-5 sm:space-y-6">
-              {error && (
-                <div className="p-3 sm:p-4 border-l-2 border-red-600 bg-red-50 text-red-700 text-xs sm:text-sm">
-                  {error}
-                </div>
-              )}
-
+            <form onSubmit={handleVerifyCode} className="space-y-4">
               <div>
-                <label htmlFor="code" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                  VERIFICATION CODE (6 DIGITS)
-                </label>
                 <input
                   type="text"
-                  id="code"
-                  maxLength={6}
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="000000"
-                  className="w-full px-4 sm:px-10 py-4 sm:py-5 text-center text-xl sm:text-2xl tracking-[0.3em] bg-white border-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-700"
+                  className="w-full px-4 py-3 border-2 border-black text-center text-2xl tracking-widest font-bold uppercase"
+                  maxLength={6}
                 />
               </div>
+
+              {error && (
+                <div className="flex items-start gap-3 p-3 bg-red-50 border-2 border-red-300">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
 
               <button
                 type="submit"
                 disabled={isVerifying || verificationCode.length !== 6}
-                className="w-full py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full py-3 px-4 bg-black text-white font-bold uppercase text-sm tracking-wide hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
-                {isVerifying ? 'VERIFYING...' : 'VERIFY CODE'}
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify Email'
+                )}
               </button>
             </form>
 
-            <p className="text-gray-700 text-xs sm:text-sm mt-6 sm:mt-8">
+            <p className="text-center text-xs text-gray-600 mt-6">
               Didn't receive the code?{' '}
               <button
+                type="button"
                 onClick={() => setSuccess(false)}
-                className="font-semibold text-black hover:underline"
+                className="text-black font-bold hover:underline"
               >
-                TRY AGAIN
+                Try again
               </button>
             </p>
           </div>
@@ -331,491 +423,360 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 px-4 bg-white">
-      <div className="max-w-2xl mx-auto">
-        {/* Duplicate Account Alert Modal */}
-        {showDuplicateAlert && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white p-6 sm:p-8 max-w-md w-full">
-              <div className="flex justify-center mb-4 sm:mb-6">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <AlertCircle className="w-8 h-8 text-red-600" />
-                </div>
-              </div>
-              
-              <h2 className="text-xl sm:text-2xl font-bold text-center text-black mb-3 sm:mb-4 uppercase">ACCOUNT EXISTS</h2>
-              
-              <p className="text-center text-gray-700 mb-6 sm:mb-8 text-xs sm:text-sm">
-                {duplicateMessage}
-              </p>
-              
-              <div className="space-y-2 sm:space-y-3">
-                <Link
-                  href="/auth/login"
-                  className="block w-full text-center py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-800 active:scale-95 transition-all"
-                >
-                  SIGN IN
+    <div className="min-h-screen bg-white flex items-center justify-center py-8 px-4">
+      <div className="w-full max-w-2xl">
+        <div className="border-2 border-black p-8 mb-6">
+          <h1 className="text-3xl font-bold text-black mb-2 uppercase tracking-wider">
+            Create Your Account
+          </h1>
+          <p className="text-gray-700 text-sm mb-6">
+            Join Treigo to buy or sell premium items
+          </p>
+
+          {showDuplicateAlert && (
+            <div className="mb-6 p-4 bg-orange-50 border-2 border-orange-300 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-orange-900">{duplicateMessage}</p>
+                <Link href="/auth/login" className="text-xs text-orange-900 hover:underline mt-1 inline-block">
+                  Go to login
                 </Link>
-                <Link
-                  href="/auth/forgot-password"
-                  className="block w-full text-center py-3 sm:py-4 border-b-2 border-black text-black font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-50 active:scale-95 transition-all"
-                >
-                  RESET PASSWORD
-                </Link>
-                <button
-                  onClick={() => {
-                    setShowDuplicateAlert(false)
-                    setDuplicateMessage('')
-                  }}
-                  className="w-full py-3 sm:py-4 text-gray-700 font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-50 active:scale-95 transition-all"
-                >
-                  CANCEL
-                </button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Back Link */}
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-black mb-6 sm:mb-8 hover:underline font-semibold text-xs sm:text-sm uppercase tracking-wide"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          BACK HOME
-        </Link>
-
-        {/* Main Form Container */}
-        <div className="max-w-md">
-          {/* Header */}
-          <div className="mb-8 sm:mb-12">
-            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-1 sm:mb-2 uppercase tracking-tight">CREATE ACCOUNT</h1>
-            <p className="text-gray-700 text-xs sm:text-sm">Join Trèigo to start shopping or selling</p>
-          </div>
-
-          {/* Role Selection */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-12 border-b-2 border-black pb-6 sm:pb-8">
-            <button
-              type="button"
-              onClick={() => setRole('BUYER')}
-              className={`p-3 sm:p-4 border-2 transition-all active:scale-95 ${
-                role === 'BUYER' 
-                  ? 'border-black bg-black text-white' 
-                  : 'border-black text-black hover:bg-gray-50'
-              }`}
-            >
-              <User className="w-5 sm:w-6 h-5 sm:h-6 mx-auto mb-1 sm:mb-2" />
-              <p className="font-semibold uppercase text-xs tracking-wide">Buyer</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('SELLER')}
-              className={`p-3 sm:p-4 border-2 transition-all active:scale-95 ${
-                role === 'SELLER' 
-                  ? 'border-black bg-black text-white' 
-                  : 'border-black text-black hover:bg-gray-50'
-              }`}
-            >
-              <Store className="w-5 sm:w-6 h-5 sm:h-6 mx-auto mb-1 sm:mb-2" />
-              <p className="font-semibold uppercase text-xs tracking-wide">Seller</p>
-            </button>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 sm:mb-8 p-3 sm:p-4 border-l-4 border-red-600 bg-red-50 text-red-700 text-xs sm:text-sm">
-              {error}
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-6">
-              <div>
-                <label htmlFor="firstName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                  FIRST NAME *
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                  placeholder="John"
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                  LAST NAME *
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                EMAIL *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                placeholder="john@example.com"
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                PHONE *
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                placeholder="+355 69 xxx xxxx"
-              />
-              <p className="text-xs text-gray-600 mt-2">Format: +355 69 or 069</p>
-            </div>
-
-            {/* Country & City */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-6">
-              <div>
-                <label htmlFor="country" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                  COUNTRY *
-                </label>
-                <select
-                  id="country"
-                  name="country"
-                  required
-                  value={formData.country}
-                  onChange={handleChange}
-                  className="w-full px-0 py-2 sm:py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-sm sm:text-base"
-                >
-                  {countries.map(country => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="city" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                  CITY *
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  required
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                  placeholder="Tirana"
-                />
-              </div>
-            </div>
-
-            {/* Address */}
-            <div>
-              <label htmlFor="address" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                ADDRESS *
-              </label>
+            <div className="grid grid-cols-2 gap-4">
               <input
                 type="text"
-                id="address"
-                name="address"
-                required
-                value={formData.address}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
-                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                placeholder="Street address"
+                placeholder="First Name *"
+                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                required
+              />
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Last Name *"
+                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                required
               />
             </div>
-            {/* Seller Fields - Only show when role is SELLER */}
-            {role === 'SELLER' && (
-              <>
-                <div>
-                  <label htmlFor="storeName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                    STORE NAME *
-                  </label>
-                  <input
-                    type="text"
-                    id="storeName"
-                    name="storeName"
-                    required
-                    value={formData.storeName}
-                    onChange={handleChange}
-                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                    placeholder="Your store/shop name"
-                  />
-                </div>
 
-                <div>
-                  <label htmlFor="businessName" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                    BUSINESS NAME *
-                  </label>
-                  <input
-                    type="text"
-                    id="businessName"
-                    name="businessName"
-                    required
-                    value={formData.businessName}
-                    onChange={handleChange}
-                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                    placeholder="Your business/store name"
-                  />
-                </div>
+            {/* Username */}
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Username *"
+              className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              required
+            />
 
-                {/* Store Photo Upload */}
-                <div>
-                  <label htmlFor="storePhoto" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                    STORE PHOTO (OPTIONAL)
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-black transition-colors">
-                    {storePhotoPreview ? (
-                      <>
-                        <img
-                          src={storePhotoPreview}
-                          alt="Store preview"
-                          className="w-24 sm:w-32 h-24 sm:h-32 mx-auto object-cover rounded mb-3 sm:mb-4"
-                        />
-                        <p className="text-xs sm:text-sm text-gray-600 mb-2">Store photo selected</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setStorePhotoFile(null)
-                            setStorePhotoPreview(null)
-                          }}
-                          className="text-xs text-blue-600 hover:underline"
-                        >
-                          Change photo
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-xs sm:text-sm text-gray-600 mb-2">Upload a store photo or logo</p>
-                        <label className="cursor-pointer inline-block px-3 sm:px-4 py-2 bg-black text-white text-xs font-semibold rounded hover:bg-gray-800 active:scale-95 transition-all">
-                          Choose Photo
-                          <input
-                            type="file"
-                            id="storePhoto"
-                            accept="image/*"
-                            onChange={handleStorePhotoChange}
-                            className="hidden"
-                          />
-                        </label>
-                      </>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-2">You can also add or change your store photo later in your profile settings</p>
-                </div>
+            {/* Email */}
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email *"
+              className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              required
+            />
 
-                <div>
-                  <label htmlFor="nipt" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                    NIPT (VAT ID) *
-                  </label>
-                  <input
-                    type="text"
-                    id="nipt"
-                    name="nipt"
-                    required
-                    value={formData.nipt}
-                    onChange={handleChange}
-                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                    placeholder="10-digit NIPT number"
-                    maxLength={10}
-                  />
-                  <p className="text-xs text-gray-600 mt-2">Required by Albanian tax authorities for business operations</p>
-                </div>
-
-                <div>
-                  <label htmlFor="taxRegistration" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                    TAX REGISTRATION NUMBER *
-                  </label>
-                  <input
-                    type="text"
-                    id="taxRegistration"
-                    name="taxRegistration"
-                    required
-                    value={formData.taxRegistration}
-                    onChange={handleChange}
-                    className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                    placeholder="Tax registration/License number"
-                  />
-                  <p className="text-xs text-gray-600 mt-2">Business registration number from Albanian Registry of Businesses</p>
-                </div>
-              </>
-            )}
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                PASSWORD *
-              </label>
-              <div className="relative mb-3 sm:mb-4">
+            {/* Password Fields */}
+            <div className="space-y-4">
+              <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  id="password"
                   name="password"
-                  required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base pr-12"
-                  placeholder="Minimum 8 characters"
+                  placeholder="Password *"
+                  className="w-full px-4 py-3 pr-12 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                  required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black transition-colors p-2 active:scale-90"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              
-              {/* Password Requirements */}
+
+              {/* Password Validation Indicator */}
               {formData.password && (
-                <div className="space-y-1 sm:space-y-2 p-3 sm:p-4 bg-gray-50 border-l-2 border-black mb-4 sm:mb-6">
-                  <p className="text-xs font-semibold text-black uppercase tracking-wide">PASSWORD REQUIREMENTS:</p>
-                  <ul className="space-y-1 sm:space-y-2 text-xs text-gray-700">
-                    <li className={`flex items-center gap-2 ${formData.password.length >= 8 ? 'text-black font-semibold' : 'text-gray-600'}`}>
-                      <span className={formData.password.length >= 8 ? 'text-black' : 'text-gray-400'}>✓</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      formData.password.length >= 8 ? 'border-green-600 bg-green-50' : 'border-gray-300'
+                    }`}>
+                      {formData.password.length >= 8 && <Check className="w-3 h-3 text-green-600" />}
+                    </div>
+                    <span className={formData.password.length >= 8 ? 'text-green-700 font-semibold' : 'text-gray-600'}>
                       At least 8 characters
-                    </li>
-                    <li className={`flex items-center gap-2 ${/[A-Z]/.test(formData.password) ? 'text-black font-semibold' : 'text-gray-600'}`}>
-                      <span className={/[A-Z]/.test(formData.password) ? 'text-black' : 'text-gray-400'}>✓</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      /[A-Z]/.test(formData.password) ? 'border-green-600 bg-green-50' : 'border-gray-300'
+                    }`}>
+                      {/[A-Z]/.test(formData.password) && <Check className="w-3 h-3 text-green-600" />}
+                    </div>
+                    <span className={/[A-Z]/.test(formData.password) ? 'text-green-700 font-semibold' : 'text-gray-600'}>
                       One uppercase letter (A-Z)
-                    </li>
-                    <li className={`flex items-center gap-2 ${/[0-9]/.test(formData.password) ? 'text-black font-semibold' : 'text-gray-600'}`}>
-                      <span className={/[0-9]/.test(formData.password) ? 'text-black' : 'text-gray-400'}>✓</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      /[0-9]/.test(formData.password) ? 'border-green-600 bg-green-50' : 'border-gray-300'
+                    }`}>
+                      {/[0-9]/.test(formData.password) && <Check className="w-3 h-3 text-green-600" />}
+                    </div>
+                    <span className={/[0-9]/.test(formData.password) ? 'text-green-700 font-semibold' : 'text-gray-600'}>
                       One number (0-9)
-                    </li>
-                    <li className={`flex items-center gap-2 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-black font-semibold' : 'text-gray-600'}`}>
-                      <span className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-black' : 'text-gray-400'}>✓</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'border-green-600 bg-green-50' : 'border-gray-300'
+                    }`}>
+                      {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) && <Check className="w-3 h-3 text-green-600" />}
+                    </div>
+                    <span className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-green-700 font-semibold' : 'text-gray-600'}>
                       One special character (!@#$%^&*)
-                    </li>
-                  </ul>
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm Password *"
+                className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                required
+              />
+            </div>
+
+            {/* Phone */}
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Phone Number (069 or +355) *"
+              className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              required
+            />
+
+            {/* Country & City */}
+            <div className="grid grid-cols-2 gap-4">
+              <select
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              >
+                {countries.map(c => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="City *"
+                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                required
+              />
+            </div>
+
+            {/* Address with Google Maps */}
+            <div>
+              <div ref={addressInputRef} className="relative">
+                <div className="flex items-center gap-2 px-4 py-3 border-2 border-black bg-white">
+                  <MapPin className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={(e) => handleAddressInput(e.target.value)}
+                    onFocus={() => formData.address && setShowSuggestions(true)}
+                    placeholder="Address (search & select from Google Maps) *"
+                    className="flex-1 bg-transparent outline-none font-semibold text-sm uppercase tracking-wide"
+                    required
+                  />
+                  {formData.address && !loadingAddressSuggestions && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, address: '' }))}
+                      className="text-gray-400 hover:text-black"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  {loadingAddressSuggestions && (
+                    <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                  )}
+                </div>
+
+                {/* Suggestions Dropdown */}
+                {showSuggestions && addressSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 border-2 border-t-0 border-black bg-white z-50 max-h-64 overflow-y-auto">
+                    {addressSuggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.place_id}
+                        type="button"
+                        onClick={() => handleAddressSelect(suggestion)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-200 last:border-b-0 text-sm"
+                      >
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-xs uppercase truncate">{suggestion.main_text}</p>
+                            <p className="text-xs text-gray-600 truncate">{suggestion.description.split(',').slice(1).join(',')}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Shop Creation Checkbox */}
+            <div className="border-2 border-black p-4 space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={wantShop}
+                  onChange={(e) => setWantShop(e.target.checked)}
+                  className="w-5 h-5 border-2 border-black bg-white cursor-pointer mt-0.5"
+                />
+                <span className="text-sm font-bold uppercase tracking-wide leading-tight">
+                  I want to create a shop to sell items
+                </span>
+              </label>
+
+              {/* Shop Fields */}
+              {wantShop && (
+                <div className="space-y-4 pt-4 border-t-2 border-black">
+                  <input
+                    type="text"
+                    name="shopName"
+                    value={formData.shopName}
+                    onChange={handleChange}
+                    placeholder="Shop Name *"
+                    className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                  />
+                  <input
+                    type="text"
+                    name="businessName"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                    placeholder="Business Name *"
+                    className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                  />
+                  <input
+                    type="text"
+                    name="taxId"
+                    value={formData.taxId}
+                    onChange={handleChange}
+                    placeholder="Tax ID (10 digits) *"
+                    className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                  />
                 </div>
               )}
             </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-xs font-semibold text-black mb-2 sm:mb-3 uppercase tracking-wide">
-                CONFIRM PASSWORD *
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="confirmPassword"
-                name="confirmPassword"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 sm:px-10 py-3 sm:py-4 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors placeholder:text-gray-500 text-sm sm:text-base"
-                placeholder="Re-enter password"
-              />
-              {formData.password && formData.confirmPassword && formData.password === formData.confirmPassword && (
-                <p className="text-xs text-green-700 mt-2 font-semibold">✓ PASSWORDS MATCH</p>
-              )}
-              {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="text-xs text-red-600 mt-2 font-semibold">✗ PASSWORDS DO NOT MATCH</p>
-              )}
-            </div>
-
-            {/* Terms and Conditions Checkbox */}
-            <div className="flex items-start gap-3 py-4 border-b-2 border-gray-300">
+            {/* Terms Checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                id="acceptTerms"
                 name="acceptTerms"
                 checked={formData.acceptTerms}
                 onChange={handleChange}
-                className="mt-1 w-5 h-5 border-2 border-black cursor-pointer flex-shrink-0"
+                className="w-5 h-5 border-2 border-black bg-white cursor-pointer mt-0.5"
+                required
               />
-              <label htmlFor="acceptTerms" className="text-xs sm:text-xs text-gray-700 cursor-pointer leading-relaxed">
-                I agree to Trèigo's{' '}
-                <Link href="/terms" className="text-black font-semibold hover:underline">
-                  Terms of Service
+              <span className="text-xs text-gray-700 leading-tight">
+                I accept the{' '}
+                <Link href="/terms" className="text-black font-bold hover:underline">
+                  Terms & Conditions
                 </Link>
                 {' '}and{' '}
-                <Link href="/privacy" className="text-black font-semibold hover:underline">
+                <Link href="/privacy" className="text-black font-bold hover:underline">
                   Privacy Policy
                 </Link>
-                {' '}*
-              </label>
-            </div>
+              </span>
+            </label>
 
-            {/* Marketing Emails Checkbox */}
-            <div className="flex items-start gap-3 py-4 border-b-2 border-gray-300">
+            {/* Marketing Checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                id="acceptsMarketing"
                 name="acceptsMarketing"
                 checked={formData.acceptsMarketing}
                 onChange={handleChange}
-                className="mt-1 w-5 h-5 border-2 border-black cursor-pointer flex-shrink-0"
+                className="w-5 h-5 border-2 border-black bg-white cursor-pointer mt-0.5"
               />
-              <label htmlFor="acceptsMarketing" className="text-xs sm:text-xs text-gray-700 cursor-pointer leading-relaxed">
-                Keep me updated with exclusive offers, new products, and personalized recommendations. You can change this preference anytime in your{' '}
-                <Link href="/buyer/profile" className="text-black font-semibold hover:underline">
-                  account settings
-                </Link>
-                .
-              </label>
-            </div>
+              <span className="text-xs text-gray-700">
+                Send me news and updates
+              </span>
+            </label>
 
-            {/* Submit */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 px-4 bg-black text-white font-bold uppercase text-sm tracking-wide hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="hidden sm:inline">CREATING ACCOUNT...</span>
-                  <span className="sm:hidden">CREATING...</span>
+                  Creating Account...
                 </>
               ) : (
-                `CREATE ACCOUNT AS ${role === 'SELLER' ? 'SELLER' : 'BUYER'}`
+                'Create Account'
               )}
             </button>
+
+            {/* Login Link */}
+            <p className="text-center text-sm text-gray-700">
+              Already have an account?{' '}
+              <Link href="/auth/login" className="text-black font-bold hover:underline">
+                Login
+              </Link>
+            </p>
           </form>
         </div>
       </div>
     </div>
-    )
-  }
+  )
+}
 
-  export default function RegisterPage() {
-    return (
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-10 h-10 text-treigo-forest animate-spin" />
-        </div>
-      }>
-        <RegisterForm />
-      </Suspense>
-    )
-  }
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>}>
+      <RegisterForm />
+    </Suspense>
+  )
+}
