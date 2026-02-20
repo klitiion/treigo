@@ -203,6 +203,7 @@ function SearchContent() {
     setPriceMin('')
     setPriceMax('')
     router.push('/search')
+    setIsFilterOpen(false)
   }
 
   const getConditionLabel = (cond: string) => {
@@ -211,199 +212,226 @@ function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-12 lg:py-20">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        {/* Search Header */}
-        <div className="mb-12 max-w-5xl mx-auto">
-          <form onSubmit={handleSearch} className="flex gap-4">
+    <div className="min-h-screen bg-white">
+      {/* Search Header - Fixed on mobile for better UX */}
+      <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto">
+          <form onSubmit={handleSearch} className="flex gap-3 sm:gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black pointer-events-none" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search products, brands..."
-                className="w-full pl-12 pr-4 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none placeholder:text-gray-600 transition-colors text-black"
+                placeholder="Search products..."
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:border-black focus:outline-none placeholder:text-gray-500 transition-colors text-sm sm:text-base"
               />
             </div>
             <button
               type="button"
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className="px-6 py-3 border-2 border-black text-black font-bold uppercase tracking-wide hover:bg-black hover:text-white transition-colors"
+              className="px-4 sm:px-6 py-3 border-2 border-black text-black font-bold uppercase text-xs sm:text-sm tracking-wide hover:bg-black hover:text-white transition-all duration-200 active:scale-95 min-h-[48px]"
             >
               <span className="hidden sm:inline">FILTERS</span>
               <SlidersHorizontal className="w-5 h-5 sm:hidden" />
             </button>
           </form>
         </div>
+      </div>
 
-        {/* Filters Panel */}
-        {isFilterOpen && (
-          <div className="border-2 border-black p-8 mb-12 max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-bold uppercase tracking-wide text-black mb-3">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-black focus:border-black focus:outline-none"
-                >
-                  {categories.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
-                  ))}
-                </select>
-              </div>
+      {/* Mobile Filter Backdrop */}
+      {isFilterOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 z-20 md:hidden"
+          onClick={() => setIsFilterOpen(false)}
+        />
+      )}
 
-              {/* Condition */}
-              <div>
-                <label className="block text-sm font-bold uppercase tracking-wide text-black mb-3">Condition</label>
-                <select
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-black focus:border-black focus:outline-none"
-                >
-                  {conditions.map(cond => (
-                    <option key={cond.value} value={cond.value}>{cond.label}</option>
-                  ))}
-                </select>
-              </div>
+      {/* Filters Panel - Improved for mobile */}
+      <div
+        className={`fixed inset-y-0 left-0 z-20 w-full sm:w-96 bg-white border-r-2 border-black transform transition-transform duration-300 ease-out overflow-y-auto md:hidden ${
+          isFilterOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-6 space-y-6">
+          <div className="flex items-center justify-between border-b-2 border-black pb-4">
+            <h2 className="text-lg font-bold uppercase tracking-wide">Filters</h2>
+            <button
+              onClick={() => setIsFilterOpen(false)}
+              className="p-2 hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-              {/* Price Range */}
-              <div>
-                <label className="block text-sm font-bold uppercase tracking-wide text-black mb-3">Price</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={priceMin}
-                    onChange={(e) => setPriceMin(e.target.value)}
-                    placeholder="Min"
-                    className="w-full px-3 py-3 bg-white border border-black focus:border-black focus:outline-none"
-                  />
-                  <span className="text-black">-</span>
-                  <input
-                    type="number"
-                    value={priceMax}
-                    onChange={(e) => setPriceMax(e.target.value)}
-                    placeholder="Max"
-                    className="w-full px-3 py-3 bg-white border border-black focus:border-black focus:outline-none"
-                  />
-                </div>
-              </div>
+          {/* Category */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wide text-black mb-3">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none text-sm"
+            >
+              {categories.map(cat => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </select>
+          </div>
 
-              {/* Sort */}
-              <div>
-                <label className="block text-sm font-bold uppercase tracking-wide text-black mb-3">Sort By</label>
+          {/* Condition */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wide text-black mb-3">Condition</label>
+            <select
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none text-sm"
+            >
+              {conditions.map(cond => (
+                <option key={cond.value} value={cond.value}>{cond.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Price Range */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wide text-black mb-3">Price (L)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)}
+                placeholder="Min"
+                className="flex-1 px-3 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none text-sm"
+              />
+              <span className="text-black font-bold">-</span>
+              <input
+                type="number"
+                value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)}
+                placeholder="Max"
+                className="flex-1 px-3 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wide text-black mb-3">Sort By</label>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none text-sm"
+            >
+              {sortOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 border-t-2 border-black pt-6">
+            <button
+              onClick={clearFilters}
+              className="flex-1 px-4 py-3 text-black font-bold uppercase text-xs tracking-wide border-2 border-black hover:bg-gray-100 transition-colors rounded-lg"
+            >
+              Clear
+            </button>
+            <button
+              onClick={handleSearch}
+              className="flex-1 px-4 py-3 bg-black text-white font-bold uppercase text-xs tracking-wide hover:bg-gray-900 transition-colors rounded-lg"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Results Header */}
+          <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-gray-200 flex-wrap gap-4">
+            <div>
+              <p className="text-black text-xs sm:text-sm">
+                <span className="font-bold">{products.length}</span> RESULTS
+                {query && <span className="text-gray-600"> FOR "{query.toUpperCase()}"</span>}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Sort - Mobile dropdown */}
+              <div className="relative">
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-black focus:border-black focus:outline-none"
+                  className="appearance-none pl-4 pr-10 py-2 bg-white border-2 border-gray-300 text-xs sm:text-sm font-bold uppercase tracking-wide focus:border-black focus:outline-none cursor-pointer rounded-lg"
                 >
                   {sortOptions.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none" />
+              </div>
+
+              {/* View Mode */}
+              <div className="hidden sm:flex items-center gap-2 border-2 border-black rounded-lg p-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 transition-all ${viewMode === 'grid' ? 'bg-black text-white' : 'text-black hover:bg-gray-100'}`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 transition-all ${viewMode === 'list' ? 'bg-black text-white' : 'text-black hover:bg-gray-100'}`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
               </div>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between border-t-2 border-black pt-6">
+          {/* Products Grid/List */}
+          {isLoading ? (
+            <div className="text-center py-20">
+              <div className="inline-block">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+              </div>
+              <p className="text-gray-600 mt-4 text-sm sm:text-base">Searching products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 px-4">
+              <h2 className="text-2xl sm:text-4xl font-900 text-black mb-4 uppercase tracking-tight">No Results Found</h2>
+              <p className="text-gray-600 mb-8 text-sm sm:text-base">Try adjusting your filters or search for something else</p>
               <button
                 onClick={clearFilters}
-                className="text-black text-sm font-bold uppercase tracking-wide hover:underline transition-colors"
+                className="px-6 sm:px-8 py-3 bg-black text-white font-bold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-900 transition-colors rounded-lg active:scale-95"
               >
                 Clear Filters
               </button>
-              <button
-                onClick={handleSearch}
-                className="px-8 py-3 bg-black text-white font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-              >
-                Apply
-              </button>
             </div>
-          </div>
-        )}
-
-        {/* Results Header */}
-        <div className="flex items-center justify-between mb-12 pb-6 border-b-2 border-gray-300 max-w-5xl mx-auto">
-          <div>
-            <p className="text-black text-sm">
-              <span className="font-bold">{products.length}</span> RESULTS
-              {query && <span className="text-gray-600"> FOR "{query.toUpperCase()}"</span>}
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {/* Sort */}
-            <div className="relative">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="appearance-none pl-4 pr-10 py-2 bg-white border border-black text-sm font-bold uppercase tracking-wide focus:outline-none cursor-pointer"
-              >
-                {sortOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none" />
+          ) : (
+            <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 animate-fadeIn' : 'space-y-4 animate-fadeIn'}>
+              {products.map((product) => (
+                <div key={product.id} className="stagger-item">
+                  <ProductCard
+                    id={product.id}
+                    title={product.title}
+                    price={product.price}
+                    originalPrice={product.originalPrice}
+                    condition={product.condition}
+                    brand={product.brand}
+                    verified={product.trustBadge}
+                    shop={product.shop}
+                    city={product.city}
+                    viewMode={viewMode}
+                    conditionLabel={getConditionLabel(product.condition)}
+                  />
+                </div>
+              ))}
             </div>
-
-            {/* View Mode */}
-            <div className="hidden sm:flex items-center gap-2 border-2 border-black p-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-black text-white' : 'text-black hover:bg-gray-100'}`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-black text-white' : 'text-black hover:bg-gray-100'}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-
-        {/* Products Grid/List */}
-        {isLoading ? (
-          <div className="text-center py-20">
-            <div className="inline-block">
-              <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-            </div>
-            <p className="text-gray-600 mt-4">Searching products...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-20">
-            <h2 className="text-4xl font-900 text-black mb-4 uppercase tracking-tight">No Results Found</h2>
-            <p className="text-gray-600 mb-8">Try adjusting your filters or search for something else</p>
-            <button
-              onClick={clearFilters}
-              className="px-8 py-3 bg-black text-white font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
-            {products.map((product) => (
-              <div key={product.id}>
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  title={product.title}
-                  price={product.price}
-                  originalPrice={product.originalPrice}
-                  condition={product.condition}
-                  brand={product.brand}
-                  verified={product.trustBadge}
-                  shop={product.shop}
-                  city={product.city}
-                  viewMode={viewMode}
-                  conditionLabel={getConditionLabel(product.condition)}
-                />              </div>            ))}
-          </div>
-        )}
       </div>
     </div>
   )

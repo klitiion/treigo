@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { sendVerificationEmail } from '@/lib/email'
 import { validatePassword } from '@/lib/passwordValidator'
 
+import { generateSlug } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {

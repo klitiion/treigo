@@ -162,36 +162,36 @@ export default function CheckoutPage() {
   // Redirect after cash payment confirmation
   if (paymentMethod === 'cash' && orderCreated) {
     return (
-      <div className="min-h-screen bg-white py-12">
-        <div className="container-treigo max-w-2xl">
-          <div className="text-center py-16">
-            <div className="mb-8">
-              <CheckCircle className="w-20 h-20 text-black mx-auto" />
+      <div className="min-h-screen bg-white py-8 sm:py-12">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12 sm:py-16 animate-slideUp">
+            <div className="mb-6 sm:mb-8">
+              <CheckCircle className="w-16 sm:w-20 h-16 sm:h-20 text-black mx-auto animate-scalePop" />
             </div>
-            <h1 className="text-4xl font-bold text-black mb-4 uppercase tracking-tight">ORDER CONFIRMED</h1>
-            <p className="text-lg text-gray-700 mb-8">Thank you! Your order has been received.</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 uppercase tracking-tight">ORDER CONFIRMED</h1>
+            <p className="text-base sm:text-lg text-gray-700 mb-8">Thank you! Your order has been received.</p>
             
-            <div className="bg-white border-2 border-black p-8 mb-8">
-              <p className="text-gray-700 mb-4 text-sm uppercase tracking-wide font-semibold">ORDER CODE</p>
-              <p className="text-3xl font-bold text-black font-mono mb-4">{orderCode}</p>
+            <div className="bg-white border-2 border-black p-6 sm:p-8 mb-6 sm:mb-8 rounded-lg">
+              <p className="text-gray-700 mb-4 text-xs uppercase tracking-wide font-semibold">ORDER CODE</p>
+              <p className="text-2xl sm:text-3xl font-bold text-black font-mono mb-4 break-all">{orderCode}</p>
               <p className="text-xs text-gray-600 uppercase tracking-wide font-semibold">SAVE THIS CODE TO TRACK YOUR ORDER</p>
             </div>
 
-            <div className="bg-gray-100 border-2 border-black p-6 mb-8">
-              <p className="text-black font-semibold mb-2 uppercase text-sm tracking-wide">📧 CONFIRMATION EMAIL</p>
-              <p className="text-sm text-blue-800">Një email konfirmimi me detajet e porosies është dërguar në {shippingInfo?.email}</p>
+            <div className="bg-gray-50 border-l-4 border-black p-4 sm:p-6 mb-6 sm:mb-8 rounded-lg">
+              <p className="text-black font-semibold mb-2 uppercase text-xs sm:text-sm tracking-wide">📧 CONFIRMATION EMAIL</p>
+              <p className="text-xs sm:text-sm text-blue-800 break-all">Confirmation sent to {shippingInfo?.email}</p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <Link
                 href={`/track/${orderCode}`}
-                className="block px-6 py-4 bg-black text-white font-semibold uppercase text-sm tracking-wide hover:bg-gray-800 transition-colors"
+                className="block px-6 py-3 sm:py-4 bg-black text-white font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-gray-900 transition-colors rounded-lg active:scale-95 min-h-[48px] flex items-center justify-center"
               >
                 TRACK ORDER
               </Link>
               <Link
                 href="/"
-                className="block px-6 py-4 border-2 border-black text-black font-semibold uppercase text-sm tracking-wide hover:bg-black hover:text-white transition-colors"
+                className="block px-6 py-3 sm:py-4 border-2 border-black text-black font-semibold uppercase text-xs sm:text-sm tracking-wide hover:bg-black hover:text-white transition-colors rounded-lg active:scale-95 min-h-[48px] flex items-center justify-center"
               >
                 BACK HOME
               </Link>
@@ -203,8 +203,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-12">
-      <div className="container-treigo max-w-2xl">
+    <div className="min-h-screen bg-white pb-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {!mounted ? (
           <div className="text-center py-12">Loading...</div>
         ) : !shippingInfo ? (
@@ -212,79 +212,80 @@ export default function CheckoutPage() {
         ) : paymentMethod === 'method-select' ? (
           // Payment Method Selection
           <>
-            <div className="mb-12">
-              <h1 className="text-4xl font-bold text-black mb-2 uppercase tracking-tight">CHECKOUT</h1>
+            <div className="mb-8 sm:mb-12">
+              <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2 uppercase tracking-tight">CHECKOUT</h1>
               <p className="text-gray-700 text-sm">Choose your payment method</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4 mb-8">
+            {/* Payment Methods - Responsive Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
               {/* Cash Payment */}
               <button
                 onClick={handleCashPayment}
-                className="p-8 bg-white border-2 border-black hover:bg-black hover:text-white transition-all group text-center"
+                className="p-6 sm:p-8 bg-white border-2 border-black hover:bg-black hover:text-white transition-all duration-200 group text-center active:scale-95 min-h-[200px] flex flex-col items-center justify-center gap-2"
               >
-                <Banknote className="w-12 h-12 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="text-xl font-bold mb-2 uppercase tracking-wide text-sm">CASH ON DELIVERY</h3>
-                <p className="text-sm">Pay when you receive your order</p>
+                <Banknote className="w-10 sm:w-12 h-10 sm:h-12 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold uppercase tracking-wide text-xs sm:text-sm">CASH ON DELIVERY</h3>
+                <p className="text-xs sm:text-sm leading-tight">Pay when you receive</p>
               </button>
 
               {/* Card Payment */}
               <button
                 onClick={() => setPaymentMethod('card')}
-                className="p-8 bg-white border-2 border-black hover:bg-black hover:text-white transition-all group text-center"
+                className="p-6 sm:p-8 bg-white border-2 border-black hover:bg-black hover:text-white transition-all duration-200 group text-center active:scale-95 min-h-[200px] flex flex-col items-center justify-center gap-2"
               >
-                <CreditCard className="w-12 h-12 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="text-xl font-bold mb-2 uppercase tracking-wide text-sm">CREDIT CARD</h3>
-                <p className="text-sm">Visa, Mastercard, or Maestro</p>
+                <CreditCard className="w-10 sm:w-12 h-10 sm:h-12 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold uppercase tracking-wide text-xs sm:text-sm">CREDIT CARD</h3>
+                <p className="text-xs sm:text-sm leading-tight">Visa, Mastercard</p>
               </button>
 
               {/* PayPal Payment */}
               <button
                 onClick={() => setPaymentMethod('paypal')}
-                className="p-8 bg-white border-2 border-black hover:bg-black hover:text-white transition-all group text-center"
+                className="p-6 sm:p-8 bg-white border-2 border-black hover:bg-black hover:text-white transition-all duration-200 group text-center active:scale-95 min-h-[200px] flex flex-col items-center justify-center gap-2"
               >
-                <Wallet className="w-12 h-12 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="text-xl font-bold mb-2 uppercase tracking-wide text-sm">PAYPAL</h3>
-                <p className="text-sm">PayPal or Apple Pay</p>
+                <Wallet className="w-10 sm:w-12 h-10 sm:h-12 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold uppercase tracking-wide text-xs sm:text-sm">PAYPAL</h3>
+                <p className="text-xs sm:text-sm leading-tight">PayPal, Apple Pay</p>
               </button>
             </div>
 
             {/* Order Summary */}
-            <div className="bg-white border-2 border-black p-8">
-              <h2 className="font-semibold text-black mb-6 uppercase text-sm tracking-wide">ORDER SUMMARY</h2>
+            <div className="bg-white border-2 border-black p-6 sm:p-8 animate-slideUp">
+              <h2 className="font-semibold text-black mb-6 uppercase text-xs sm:text-sm tracking-wide">ORDER SUMMARY</h2>
               
               <div className="space-y-4 mb-6 pb-6 border-b-2 border-black">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-700 uppercase text-xs tracking-wide font-semibold">SUBTOTAL</span>
+                <div className="flex justify-between text-xs sm:text-sm">
+                  <span className="text-gray-700 uppercase tracking-wide font-semibold">Subtotal</span>
                   <span className="font-semibold text-black">{cartTotal.toLocaleString()}L</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-700 uppercase text-xs tracking-wide font-semibold">SHIPPING</span>
-                  <span className="font-medium text-treigo-dark">{shippingCost.toLocaleString()} L</span>
+                <div className="flex justify-between text-xs sm:text-sm">
+                  <span className="text-gray-700 uppercase tracking-wide font-semibold">Shipping</span>
+                  <span className="font-semibold text-black">{shippingCost.toLocaleString()}L</span>
                 </div>
               </div>
 
               {/* Product Verification Option */}
               <div className="mb-6 pb-6 border-b-2 border-black">
-                <label className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
+                <label className="flex items-start sm:items-center gap-3 p-3 sm:p-4 bg-gray-50 border-2 border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg">
                   <input 
                     type="checkbox" 
                     checked={verifyProduct} 
                     onChange={(e) => setVerifyProduct(e.target.checked)}
-                    className="w-5 h-5 border-2 border-black focus:ring-black" 
+                    className="w-5 h-5 border-2 border-black focus:ring-black mt-1 sm:mt-0 flex-shrink-0" 
                   />
-                  <div className="flex-1">
-                    <p className="font-semibold text-black text-sm uppercase tracking-wide">Verify Product from Trèigo</p>
-                    <p className="text-xs text-gray-600">Get professional verification for authenticity assurance</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-black text-xs sm:text-sm uppercase tracking-wide">Verify Product</p>
+                    <p className="text-xs text-gray-600">Professional authenticity assurance</p>
                   </div>
-                  <span className="font-bold text-black">+200 L</span>
+                  <span className="font-bold text-black text-sm flex-shrink-0">+200L</span>
                 </label>
               </div>
 
-              <div className="flex justify-between">
-                <span className="font-semibold text-treigo-dark">Totali</span>
-                <span className="text-2xl font-bold text-treigo-forest">
-                  {total.toLocaleString()} L
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-black text-sm uppercase tracking-wide">TOTAL</span>
+                <span className="text-2xl sm:text-3xl font-bold text-black">
+                  {total.toLocaleString()}L
                 </span>
               </div>
             </div>
@@ -292,16 +293,16 @@ export default function CheckoutPage() {
         ) : (
           // Card/PayPal Payment Form
           <>
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <button
                 onClick={() => setPaymentMethod('method-select')}
-                className="text-black font-semibold mb-4 uppercase text-sm tracking-wide hover:opacity-70"
+                className="text-black font-semibold mb-4 uppercase text-xs sm:text-sm tracking-wide hover:opacity-70 transition-opacity active:scale-95 inline-flex items-center gap-2"
               >
                 ← BACK</button>
-              <h1 className="text-4xl font-bold text-black mb-2 uppercase tracking-tight">
-                {paymentMethod === 'card' ? 'CARD PAYMENT' : 'PAYPAL PAYMENT'}
+              <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2 uppercase tracking-tight">
+                {paymentMethod === 'card' ? 'CARD PAYMENT' : 'PAYPAL'}
               </h1>
-              <p className="text-gray-600 text-sm">Complete your payment details to finish your order</p>
+              <p className="text-gray-600 text-xs sm:text-sm">Complete your payment to finish your order</p>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
@@ -310,70 +311,69 @@ export default function CheckoutPage() {
             {paymentMethod === 'card' ? (
               <>
                 {/* Demo Info */}
-                <div className="bg-gray-50 border-l-4 border-black p-6">
-                  <h3 className="font-semibold text-black mb-2 uppercase text-sm tracking-wide">📋 DEMO CARD</h3>
-                  <p className="text-sm text-gray-700 mb-3">
-                    This is a demo integration. For testing use:
+                <div className="bg-gray-50 border-l-4 border-black p-4 sm:p-6 rounded-lg">
+                  <h3 className="font-semibold text-black mb-2 uppercase text-xs sm:text-sm tracking-wide">📋 DEMO CARD</h3>
+                  <p className="text-xs sm:text-sm text-gray-700 mb-3">
+                    Test card:
                   </p>
-                  <div className="space-y-1 text-sm font-mono text-gray-700">
+                  <div className="space-y-1 text-xs sm:text-sm font-mono text-gray-700 bg-white p-3 rounded border border-gray-300">
                     <p>Card: 4111 1111 1111 1111</p>
-                    <p>Exp: 12/25</p>
-                    <p>CVV: 123</p>
+                    <p>Exp: 12/25 | CVV: 123</p>
                   </div>
                 </div>
 
                 {/* Card Payment Form */}
-                <div className="bg-white border-2 border-black p-8">
-                  <h2 className="font-semibold text-black mb-8 uppercase text-sm tracking-wide">CARD DETAILS</h2>
+                <div className="bg-white border-2 border-black p-6 sm:p-8 rounded-lg">
+                  <h2 className="font-semibold text-black mb-6 uppercase text-xs sm:text-sm tracking-wide">CARD DETAILS</h2>
                   
-                  <div className="space-y-6">
+                  <div className="space-y-5">
                     {/* Card Number */}
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                      <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                         CARD NUMBER
                       </label>
                       <input
                         type="text"
                         placeholder="4111 1111 1111 1111"
                         maxLength={19}
-                        className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-500 text-sm focus:ring-2 focus:ring-black focus:ring-opacity-10"
                       />
                     </div>
 
                     {/* Cardholder Name */}
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                      <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                         CARDHOLDER NAME
                       </label>
                       <input
                         type="text"
                         placeholder="First Last"
-                        className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-500 text-sm focus:ring-2 focus:ring-black focus:ring-opacity-10"
                       />
                     </div>
 
                     {/* Expiry and CVV */}
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                           EXPIRY DATE
                         </label>
                         <input
                           type="text"
                           placeholder="12/25"
                           maxLength={5}
-                          className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                          className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-500 text-sm focus:ring-2 focus:ring-black focus:ring-opacity-10"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                           CVV
                         </label>
                         <input
                           type="text"
                           placeholder="123"
                           maxLength={4}
-                          className="w-full px-10 py-3 bg-white border-b-2 border-gray-300 focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-700 placeholder:font-semibold tracking-wide leading-relaxed"
+                          className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors text-black placeholder:text-gray-500 text-sm focus:ring-2 focus:ring-black focus:ring-opacity-10"
                         />
                       </div>
                     </div>
@@ -382,26 +382,26 @@ export default function CheckoutPage() {
               </>
             ) : (
               // PayPal Info
-              <div className="bg-gray-50 border-l-4 border-black p-6">
-                <h3 className="font-semibold text-black mb-2 uppercase text-sm tracking-wide">💳 PAYPAL</h3>
-                <p className="text-sm text-gray-700 mb-3">
-                  Click the button below to redirect to PayPal and complete your payment.
+              <div className="bg-gray-50 border-l-4 border-black p-4 sm:p-6 rounded-lg">
+                <h3 className="font-semibold text-black mb-2 uppercase text-xs sm:text-sm tracking-wide">💳 PAYPAL</h3>
+                <p className="text-xs sm:text-sm text-gray-700">
+                  Click the payment button below to complete via PayPal securely.
                 </p>
               </div>
             )}
 
             {/* Cart Items Display */}
             {isClient && cart.length > 0 && (
-              <div className="bg-white border-2 border-black p-8 mb-8">
-                <h2 className="font-semibold text-black mb-6 uppercase text-sm tracking-wide">YOUR ITEMS</h2>
+              <div className="bg-white border-2 border-black p-6 sm:p-8 rounded-lg">
+                <h2 className="font-semibold text-black mb-6 uppercase text-xs sm:text-sm tracking-wide">YOUR ITEMS</h2>
                 <div className="space-y-4">
                   {cart.map(item => (
-                    <div key={item.id} className="flex justify-between items-center pb-4 border-b border-gray-300 last:border-0">
-                      <div>
-                        <p className="font-semibold text-black text-sm">{item.name}</p>
+                    <div key={item.id} className="flex justify-between items-start sm:items-center pb-4 border-b border-gray-300 last:border-0 gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-black text-xs sm:text-sm break-words">{item.name}</p>
                         <p className="text-xs text-gray-600 uppercase tracking-wide">{item.seller} × {item.quantity}</p>
                       </div>
-                      <span className="font-bold text-black text-sm">{(item.price * item.quantity).toLocaleString()}L</span>
+                      <span className="font-bold text-black text-sm flex-shrink-0">{(item.price * item.quantity).toLocaleString()}L</span>
                     </div>
                   ))}
                 </div>
@@ -409,23 +409,23 @@ export default function CheckoutPage() {
             )}
 
             {/* Cart Summary */}
-            <div className="bg-white border-2 border-black p-8">
-              <h2 className="font-semibold text-black mb-6 uppercase text-sm tracking-wide">ORDER TOTAL</h2>
+            <div className="bg-white border-2 border-black p-6 sm:p-8 rounded-lg sticky bottom-4 sm:relative">
+              <h2 className="font-semibold text-black mb-6 uppercase text-xs sm:text-sm tracking-wide">ORDER TOTAL</h2>
               
               <div className="space-y-4 mb-6 pb-6 border-b-2 border-black">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-700 uppercase text-xs tracking-wide font-semibold">SUBTOTAL</span>
+                <div className="flex justify-between text-xs sm:text-sm">
+                  <span className="text-gray-700 uppercase tracking-wide font-semibold">Subtotal</span>
                   <span className="font-semibold text-black">{cartTotal.toLocaleString()}L</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-700 uppercase text-xs tracking-wide font-semibold">SHIPPING</span>
+                <div className="flex justify-between text-xs sm:text-sm">
+                  <span className="text-gray-700 uppercase tracking-wide font-semibold">Shipping</span>
                   <span className="font-semibold text-black">{shippingCost.toLocaleString()}L</span>
                 </div>
               </div>
 
-              <div className="flex justify-between mb-8">
-                <span className="font-bold text-black uppercase text-sm tracking-wide">TOTAL</span>
-                <span className="text-3xl font-bold text-black">
+              <div className="flex justify-between items-center mb-8">
+                <span className="font-bold text-black uppercase text-xs sm:text-sm tracking-wide">TOTAL</span>
+                <span className="text-2xl sm:text-3xl font-bold text-black">
                   {total.toLocaleString()}L
                 </span>
               </div>
@@ -433,22 +433,22 @@ export default function CheckoutPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-600 p-6 flex gap-4">
+              <div className="bg-red-50 border-l-4 border-red-600 p-4 sm:p-6 flex gap-4 rounded-lg">
                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-red-900 mb-1">ERROR</h3>
-                  <p className="text-sm text-red-800">{error}</p>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-red-900 mb-1 text-sm">ERROR</h3>
+                  <p className="text-xs sm:text-sm text-red-800 break-words">{error}</p>
                 </div>
               </div>
             )}
 
             {/* Success Message */}
             {orderCreated && (
-              <div className="bg-green-50 border-l-4 border-green-600 p-6 flex gap-4">
+              <div className="bg-green-50 border-l-4 border-green-600 p-4 sm:p-6 flex gap-4 rounded-lg animate-slideUp">
                 <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-green-900 mb-1">ORDER CREATED</h3>
-                  <p className="text-sm text-green-800">Redirecting to payment system...</p>
+                  <h3 className="font-semibold text-green-900 mb-1 text-sm">ORDER CREATED</h3>
+                  <p className="text-xs sm:text-sm text-green-800">Redirecting to payment...</p>
                 </div>
               </div>
             )}
@@ -457,34 +457,34 @@ export default function CheckoutPage() {
             <button
               onClick={handleCardPayment}
               disabled={isLoading || orderCreated}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-black text-white font-semibold uppercase tracking-wide text-sm hover:bg-gray-800 transition-all duration-300 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-black text-white font-semibold uppercase tracking-wide text-sm hover:bg-gray-900 transition-all duration-300 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg min-h-[48px]"
             >
               {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
               {orderCreated && <CheckCircle className="w-5 h-5" />}
               {!isLoading && !orderCreated && (paymentMethod === 'paypal' ? <Wallet className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />)}
-              {isLoading ? 'PROCESSING...' : orderCreated ? 'REDIRECTING...' : `PAY ${total.toLocaleString()}L`}
+              <span>{isLoading ? 'PROCESSING...' : orderCreated ? 'REDIRECTING...' : `PAY ${total.toLocaleString()}L`}</span>
             </button>
           </div>
 
           {/* Security Info */}
           <div className="space-y-6">
-            <div className="bg-white border-2 border-black p-8">
-              <h3 className="font-semibold text-black mb-6 uppercase text-sm tracking-wide">🔒 SECURITY</h3>
-              <ul className="space-y-3 text-sm text-gray-700">
+            <div className="bg-white border-2 border-black p-6 sm:p-8 rounded-lg">
+              <h3 className="font-semibold text-black mb-6 uppercase text-xs sm:text-sm tracking-wide">🔒 SECURITY</h3>
+              <ul className="space-y-3 text-xs sm:text-sm text-gray-700">
                 <li className="flex gap-2">
-                  <span className="font-bold">✓</span>
+                  <span className="font-bold text-black">✓</span>
                   <span>256-bit SSL Encryption</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold">✓</span>
-                  <span>3D Secure Authentication</span>
+                  <span className="font-bold text-black">✓</span>
+                  <span>3D Secure Auth</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold">✓</span>
+                  <span className="font-bold text-black">✓</span>
                   <span>PCI DSS Certified</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold">✓</span>
+                  <span className="font-bold text-black">✓</span>
                   <span>Money-Back Guarantee</span>
                 </li>
               </ul>
@@ -492,7 +492,7 @@ export default function CheckoutPage() {
 
             <Link
               href="/search"
-              className="block text-center px-4 py-4 bg-white border-2 border-black text-black font-semibold uppercase tracking-wide text-sm hover:bg-black hover:text-white transition-all"
+              className="block text-center px-4 py-4 bg-white border-2 border-black text-black font-semibold uppercase tracking-wide text-xs sm:text-sm hover:bg-black hover:text-white transition-all active:scale-95 rounded-lg min-h-[48px] flex items-center justify-center"
             >
               CONTINUE SHOPPING
             </Link>

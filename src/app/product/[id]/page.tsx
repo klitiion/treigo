@@ -149,66 +149,67 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="container-treigo max-w-6xl">
+    <div className="min-h-screen bg-white py-6 sm:py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-xs mb-12 uppercase tracking-wide font-semibold">
-          <Link href="/" className="text-gray-700 hover:underline">
+        <nav className="flex items-center gap-2 text-xs mb-8 sm:mb-12 uppercase tracking-wide font-semibold overflow-x-auto pb-2">
+          <Link href="/" className="text-gray-700 hover:underline whitespace-nowrap">
             HOME
           </Link>
-          <span className="text-gray-400">/</span>
-          <Link href={`/search?category=${product.category}`} className="text-gray-700 hover:underline">
+          <span className="text-gray-400 flex-shrink-0">/</span>
+          <Link href={`/search?category=${product.category}`} className="text-gray-700 hover:underline whitespace-nowrap">
             {product.category === 'bags' ? 'BAGS' : product.category.toUpperCase()}
           </Link>
-          <span className="text-gray-400">/</span>
-          <span className="text-gray-600 truncate max-w-[300px]">{product.title}</span>
+          <span className="text-gray-400 flex-shrink-0">/</span>
+          <span className="text-gray-600 truncate max-w-[200px] sm:max-w-[300px]">{product.title}</span>
         </nav>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Images Section */}
-          <div className="space-y-4">
+          <div className="space-y-4 order-2 lg:order-1">
             {/* Main Image */}
-            <div className="relative aspect-square bg-gray-100 border border-black overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-10">
+            <div className="relative aspect-square bg-gray-100 border-2 border-black overflow-hidden rounded-lg">
+              <div className="absolute inset-0 flex items-center justify-center text-6xl sm:text-8xl opacity-10">
                 📦
               </div>
               
               {/* Navigation Arrows */}
               <button
                 onClick={handlePrevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black text-white hover:bg-gray-800 transition-colors"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-black text-white hover:bg-gray-900 transition-all active:scale-95 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
               <button
                 onClick={handleNextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black text-white hover:bg-gray-800 transition-colors"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-black text-white hover:bg-gray-900 transition-all active:scale-95 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
               {/* Badges */}
               {product.verified && (
-                <div className="absolute top-4 left-4">
-                  <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-black text-white text-xs font-semibold uppercase tracking-wide">
-                    <CheckCircle className="w-4 h-4" /> VERIFIED
+                <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
+                  <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-black text-white text-xs font-semibold uppercase tracking-wide rounded-lg">
+                    <CheckCircle className="w-4 h-4" /> 
+                    <span className="hidden sm:inline">VERIFIED</span>
                   </span>
                 </div>
               )}
 
               {/* Image Counter */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 bg-black text-white text-xs font-semibold uppercase tracking-wide">
+              <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 px-2 sm:px-3 py-1 sm:py-2 bg-black/90 text-white text-xs font-semibold uppercase tracking-wide rounded-lg">
                 {currentImageIndex + 1} / {product.images.length}
               </div>
             </div>
 
             {/* Thumbnail Strip */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
               {product.images.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 border-2 overflow-hidden transition-all ${
+                  className={`flex-shrink-0 w-16 sm:w-20 h-16 sm:h-20 border-2 overflow-hidden transition-all rounded-lg ${
                     currentImageIndex === index
                       ? 'border-black'
                       : 'border-gray-300 opacity-60 hover:opacity-100'
@@ -223,31 +224,14 @@ export default function ProductPage() {
           </div>
 
           {/* Product Info */}
-          <div>
+          <div className="order-1 lg:order-2">
             {/* Header */}
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex-1">
+            <div className="flex items-start justify-between gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b-2 border-gray-200">
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">{product.brand}</p>
-                <h1 className="text-3xl lg:text-4xl font-bold text-black mb-1 uppercase tracking-tight">{product.title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-1 uppercase tracking-tight line-clamp-3">{product.title}</h1>
               </div>
-              <div className="flex items-center gap-2 ml-4">
-                <button
-                  onClick={handleFavoriteClick}
-                  className={`p-3 border-2 transition-all hover:scale-110 active:scale-95 ${
-                    isFavorite 
-                      ? 'bg-black border-black text-white' 
-                      : 'bg-white border-black text-black hover:bg-black hover:text-white'
-                  }`}
-                  title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="p-3 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all hover:scale-110 active:scale-95"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
+              <div className="flex items-center gap-2 ml-2 flex-shrink-0"
               </div>
             </div>
 
