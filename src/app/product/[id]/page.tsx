@@ -231,7 +231,7 @@ export default function ProductPage() {
                 <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">{product.brand}</p>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-1 uppercase tracking-tight line-clamp-3">{product.title}</h1>
               </div>
-              <div className="flex items-center gap-2 ml-2 flex-shrink-0"
+              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
               </div>
             </div>
 
