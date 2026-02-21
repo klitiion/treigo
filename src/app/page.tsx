@@ -169,7 +169,7 @@ export default function HomePage() {
 
         {/* Content Overlay */}
         <div className="relative h-full flex flex-col justify-between py-24 lg:py-32">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               {/* Main Heading */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-900 tracking-tighter mb-6 leading-tight text-white">
@@ -197,7 +197,7 @@ export default function HomePage() {
           </div>
 
           {/* Stats at Bottom */}
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <div className="grid grid-cols-3 gap-12 pt-8 border-t border-gray-700">
                 <div>
@@ -220,7 +220,7 @@ export default function HomePage() {
 
       {/* Trust Section */}
       <section className="border-b border-gray-200 py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             <div>
               <BadgeCheck className="w-8 h-8 text-black mb-4" />
@@ -248,7 +248,7 @@ export default function HomePage() {
 
       {/* Categories */}
       <section className="py-16 lg:py-20 border-b border-gray-200">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl lg:text-5xl font-900 tracking-tighter mb-12">CATEGORIES</h2>
           
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -268,7 +268,7 @@ export default function HomePage() {
 
       {/* Featured Products */}
       <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl lg:text-5xl font-900 tracking-tighter mb-4">TRENDING NOW</h2>
           <p className="text-gray-600 mb-12 uppercase text-sm tracking-wide">This week's most wanted</p>
 
@@ -318,7 +318,7 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section className="py-16 lg:py-20 bg-gray-50 border-y border-gray-200">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl lg:text-5xl font-900 tracking-tighter mb-16">HOW IT WORKS</h2>
 
           <div className="grid md:grid-cols-3 gap-12">
@@ -345,7 +345,7 @@ export default function HomePage() {
 
       {/* CTA - Sellers */}
       <section className="py-20 lg:py-24 bg-black text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-900 tracking-tighter mb-6 leading-tight">
               START SELLING
@@ -373,7 +373,7 @@ export default function HomePage() {
 
       {/* Certification */}
       <section className="py-12 border-t border-gray-200">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-8">
             <div>
               <p className="text-xs uppercase tracking-wider text-gray-500 font-600">SECURITY</p>

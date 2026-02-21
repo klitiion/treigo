@@ -5,7 +5,7 @@ import { RotateCcw, Clock, CheckCircle, AlertCircle } from 'lucide-react'
 export default function ReturnsPage() {
   return (
     <main className="min-h-screen py-12 lg:py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+        <div className="w-full px-4 sm:px-6 lg:px-8 max-w-4xl">
           <h1 className="text-5xl lg:text-6xl font-900 text-black mb-4 uppercase tracking-tight">RETURN POLICY</h1>
           <p className="text-gray-600 mb-12 uppercase text-sm tracking-wide font-semibold">How to return items purchased on Trèigo</p>
 

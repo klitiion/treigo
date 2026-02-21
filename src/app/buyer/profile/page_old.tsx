@@ -356,7 +356,7 @@ function BuyerProfile() {
   return (
     <BuyerLayout>
       <div className="min-h-screen bg-white py-12 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+        <div className="w-full px-4 sm:px-6 lg:px-8 max-w-4xl">
           {/* Header */}
           <h1 className="text-5xl lg:text-6xl font-900 text-black mb-4 uppercase tracking-tight">MY PROFILE</h1>
           <p className="text-gray-600 mb-12 uppercase text-sm tracking-wide font-semibold">Manage your account settings and preferences</p>

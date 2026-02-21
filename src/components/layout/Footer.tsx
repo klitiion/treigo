@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200">
       {/* Main Footer */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6 mb-12">
           {/* Help */}
           <div>
@@ -157,7 +157,7 @@ export function Footer() {
 
       {/* Bottom Footer */}
       <div className="border-t border-gray-200 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-gray-600 text-sm">
               © {currentYear} Trèigo. All Rights Reserved. Authentic marketplace for second-hand goods.
