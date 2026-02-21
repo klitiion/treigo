@@ -75,7 +75,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="w-screen min-h-screen bg-white flex flex-col">
       <div className="w-full px-4 sm:px-6 py-8 sm:py-12 lg:py-24 flex-1 flex items-center">
         <div className="max-w-md mx-auto w-full">
           {/* Header */}

@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
       city, 
       address,
       shopName,
-      businessName,
       taxId,
       createShop = false,
       acceptsMarketing = true,
@@ -98,9 +97,9 @@ export async function POST(request: NextRequest) {
 
     // Validate shop-specific fields if creating a shop
     if (createShop) {
-      if (!shopName || !businessName || !taxId) {
+      if (!shopName || !taxId) {
         return NextResponse.json(
-          { error: 'Shop name, business name, and Tax ID are required to create a shop' },
+          { error: 'Shop name and Tax ID are required to create a shop' },
           { status: 400 }
         )
       }

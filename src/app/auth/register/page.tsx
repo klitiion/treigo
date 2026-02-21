@@ -94,7 +94,6 @@ function RegisterForm() {
     // Shop fields
     shopName: '',
     taxId: '',
-    businessName: '',
   })
 
   // Initialize Google Places
@@ -254,10 +253,6 @@ function RegisterForm() {
         setError('Shop name is required')
         return false
       }
-      if (!formData.businessName.trim()) {
-        setError('Business name is required')
-        return false
-      }
       if (!formData.taxId.trim()) {
         setError('Tax ID is required')
         return false
@@ -356,7 +351,7 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="w-screen min-h-screen bg-white flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="border-2 border-black p-8 mb-6">
             <div className="flex justify-center mb-6">
@@ -423,7 +418,7 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center py-8 px-4">
+    <div className="w-screen min-h-screen bg-white flex items-center justify-center py-8 px-4">
       <div className="w-full max-w-2xl">
         <div className="border-2 border-black p-8 mb-6">
           <h1 className="text-3xl font-bold text-black mb-2 uppercase tracking-wider">
@@ -646,13 +641,12 @@ function RegisterForm() {
                         key={suggestion.place_id}
                         type="button"
                         onClick={() => handleAddressSelect(suggestion)}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-200 last:border-b-0 text-sm"
+                        className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-200 last:border-b-0 text-sm transition-colors"
                       >
                         <div className="flex items-start gap-2">
                           <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-xs uppercase truncate">{suggestion.main_text}</p>
-                            <p className="text-xs text-gray-600 truncate">{suggestion.description.split(',').slice(1).join(',')}</p>
+                            <p className="font-semibold text-xs uppercase">{suggestion.description}</p>
                           </div>
                         </div>
                       </button>
@@ -685,14 +679,6 @@ function RegisterForm() {
                     value={formData.shopName}
                     onChange={handleChange}
                     placeholder="Shop Name *"
-                    className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
-                  />
-                  <input
-                    type="text"
-                    name="businessName"
-                    value={formData.businessName}
-                    onChange={handleChange}
-                    placeholder="Business Name *"
                     className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
                   />
                   <input
