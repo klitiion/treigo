@@ -664,10 +664,10 @@ function RegisterForm() {
                     type="checkbox"
                     checked={wantShop}
                     onChange={(e) => setWantShop(e.target.checked)}
-                    className="w-5 h-5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
+                    className="w-4 h-4 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
                   />
                   {wantShop && (
-                    <Check className="w-3.5 h-3.5 text-white absolute top-0.5 left-0.5 pointer-events-none" />
+                    <Check className="w-3 h-3 text-white absolute top-0.5 left-0.5 pointer-events-none" />
                   )}
                 </div>
                 <span className="text-sm font-medium leading-tight">
@@ -706,11 +706,11 @@ function RegisterForm() {
                   name="acceptTerms"
                   checked={formData.acceptTerms}
                   onChange={handleChange}
-                  className="w-5 h-5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
+                  className="w-4 h-4 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
                   required
                 />
                 {formData.acceptTerms && (
-                  <Check className="w-3.5 h-3.5 text-white absolute top-1 left-0.5 pointer-events-none" />
+                  <Check className="w-3 h-3 text-white absolute top-0.5 left-0.5 pointer-events-none" />
                 )}
               </div>
               <span className="text-xs text-gray-700 leading-tight">
@@ -733,10 +733,10 @@ function RegisterForm() {
                   name="acceptsMarketing"
                   checked={formData.acceptsMarketing}
                   onChange={handleChange}
-                  className="w-5 h-5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
+                  className="w-4 h-4 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
                 />
                 {formData.acceptsMarketing && (
-                  <Check className="w-3.5 h-3.5 text-white absolute top-0.5 left-0.5 pointer-events-none" />
+                  <Check className="w-3 h-3 text-white absolute top-0.5 left-0.5 pointer-events-none" />
                 )}
               </div>
               <span className="text-xs text-gray-700">
