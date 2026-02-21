@@ -421,11 +421,11 @@ function RegisterForm() {
     <div className="w-screen min-h-screen bg-white flex items-center justify-center py-8 px-4">
       <div className="w-full max-w-2xl">
         <div className="border-2 border-black p-8 mb-6">
-          <h1 className="text-3xl font-bold text-black mb-2 uppercase tracking-wider">
+          <h1 className="text-3xl font-bold text-black mb-2">
             Create Your Account
           </h1>
           <p className="text-gray-700 text-sm mb-6">
-            Join Treigo to buy or sell premium items
+            Join Trèigo to buy or sell premium items
           </p>
 
           {showDuplicateAlert && (
@@ -455,8 +455,8 @@ function RegisterForm() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder="First Name *"
-                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                placeholder="First name"
+                className="px-4 py-3 border-2 border-black font-medium text-sm"
                 required
               />
               <input
@@ -464,8 +464,8 @@ function RegisterForm() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                placeholder="Last Name *"
-                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                placeholder="Last name"
+                className="px-4 py-3 border-2 border-black font-medium text-sm"
                 required
               />
             </div>
@@ -476,8 +476,8 @@ function RegisterForm() {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="Username *"
-              className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              placeholder="Username"
+              className="w-full px-4 py-3 border-2 border-black font-medium text-sm"
               required
             />
 
@@ -487,8 +487,8 @@ function RegisterForm() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Email *"
-              className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              placeholder="Email"
+              className="w-full px-4 py-3 border-2 border-black font-medium text-sm"
               required
             />
 
@@ -576,8 +576,8 @@ function RegisterForm() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Phone Number (069 or +355) *"
-              className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+              placeholder="Phone number (069 or +355)"
+              className="w-full px-4 py-3 border-2 border-black font-medium text-sm"
               required
             />
 
@@ -587,7 +587,7 @@ function RegisterForm() {
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
-                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                className="px-4 py-3 border-2 border-black font-medium text-sm"
               >
                 {countries.map(c => (
                   <option key={c.code} value={c.code}>{c.name}</option>
@@ -598,8 +598,8 @@ function RegisterForm() {
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
-                placeholder="City *"
-                className="px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                placeholder="City"
+                className="px-4 py-3 border-2 border-black font-medium text-sm"
                 required
               />
             </div>
@@ -615,8 +615,8 @@ function RegisterForm() {
                     value={formData.address}
                     onChange={(e) => handleAddressInput(e.target.value)}
                     onFocus={() => formData.address && setShowSuggestions(true)}
-                    placeholder="Address (search & select from Google Maps) *"
-                    className="flex-1 bg-transparent outline-none font-semibold text-sm uppercase tracking-wide"
+                    placeholder="Address (search & select from Google Maps)"
+                    className="flex-1 bg-transparent outline-none font-medium text-sm"
                     required
                   />
                   {formData.address && !loadingAddressSuggestions && (
@@ -646,7 +646,7 @@ function RegisterForm() {
                         <div className="flex items-start gap-2">
                           <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-xs uppercase">{suggestion.description}</p>
+                            <p className="font-medium text-xs">{suggestion.description}</p>
                           </div>
                         </div>
                       </button>
@@ -658,14 +658,19 @@ function RegisterForm() {
 
             {/* Shop Creation Checkbox */}
             <div className="border-2 border-black p-4 space-y-4">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={wantShop}
-                  onChange={(e) => setWantShop(e.target.checked)}
-                  className="w-5 h-5 border-2 border-black bg-white cursor-pointer mt-0.5"
-                />
-                <span className="text-sm font-bold uppercase tracking-wide leading-tight">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className="relative flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={wantShop}
+                    onChange={(e) => setWantShop(e.target.checked)}
+                    className="w-5 h-5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
+                  />
+                  {wantShop && (
+                    <Check className="w-3.5 h-3.5 text-white absolute top-0.5 left-0.5 pointer-events-none" />
+                  )}
+                </div>
+                <span className="text-sm font-medium leading-tight">
                   I want to create a shop to sell items
                 </span>
               </label>
@@ -678,16 +683,16 @@ function RegisterForm() {
                     name="shopName"
                     value={formData.shopName}
                     onChange={handleChange}
-                    placeholder="Shop Name *"
-                    className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                    placeholder="Shop name"
+                    className="w-full px-4 py-3 border-2 border-black font-medium text-sm"
                   />
                   <input
                     type="text"
                     name="taxId"
                     value={formData.taxId}
                     onChange={handleChange}
-                    placeholder="Tax ID (10 digits) *"
-                    className="w-full px-4 py-3 border-2 border-black font-semibold text-sm uppercase tracking-wide"
+                    placeholder="Tax ID (10 digits)"
+                    className="w-full px-4 py-3 border-2 border-black font-medium text-sm"
                   />
                 </div>
               )}
@@ -695,14 +700,19 @@ function RegisterForm() {
 
             {/* Terms Checkbox */}
             <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="acceptTerms"
-                checked={formData.acceptTerms}
-                onChange={handleChange}
-                className="w-5 h-5 border-2 border-black bg-white cursor-pointer mt-0.5"
-                required
-              />
+              <div className="relative flex-shrink-0 pt-0.5">
+                <input
+                  type="checkbox"
+                  name="acceptTerms"
+                  checked={formData.acceptTerms}
+                  onChange={handleChange}
+                  className="w-5 h-5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
+                  required
+                />
+                {formData.acceptTerms && (
+                  <Check className="w-3.5 h-3.5 text-white absolute top-1 left-0.5 pointer-events-none" />
+                )}
+              </div>
               <span className="text-xs text-gray-700 leading-tight">
                 I accept the{' '}
                 <Link href="/terms" className="text-black font-bold hover:underline">
@@ -716,14 +726,19 @@ function RegisterForm() {
             </label>
 
             {/* Marketing Checkbox */}
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="acceptsMarketing"
-                checked={formData.acceptsMarketing}
-                onChange={handleChange}
-                className="w-5 h-5 border-2 border-black bg-white cursor-pointer mt-0.5"
-              />
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className="relative flex-shrink-0">
+                <input
+                  type="checkbox"
+                  name="acceptsMarketing"
+                  checked={formData.acceptsMarketing}
+                  onChange={handleChange}
+                  className="w-5 h-5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors"
+                />
+                {formData.acceptsMarketing && (
+                  <Check className="w-3.5 h-3.5 text-white absolute top-0.5 left-0.5 pointer-events-none" />
+                )}
+              </div>
               <span className="text-xs text-gray-700">
                 Send me news and updates
               </span>
@@ -733,7 +748,7 @@ function RegisterForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 px-4 bg-black text-white font-bold uppercase text-sm tracking-wide hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full py-4 px-4 bg-black text-white font-bold text-sm hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
