@@ -272,7 +272,7 @@ export default function CheckoutPage() {
                     type="checkbox" 
                     checked={verifyProduct} 
                     onChange={(e) => setVerifyProduct(e.target.checked)}
-                    className="w-5 h-5 border-2 border-black focus:ring-black mt-1 sm:mt-0 flex-shrink-0" 
+                    style={{ marginTop: '2px' }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-black text-xs sm:text-sm uppercase tracking-wide">Verify Product</p>

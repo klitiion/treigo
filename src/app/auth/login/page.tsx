@@ -148,13 +148,6 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 border-2 border-black bg-white cursor-pointer appearance-none checked:bg-black checked:border-black transition-colors"
-                  style={{
-                    backgroundImage: rememberMe ? 'url("data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27white%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e")' : 'none',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'contain',
-                  }}
                 />
                 <span className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-gray-700 group-hover:text-black transition-colors">
                   Remember Me

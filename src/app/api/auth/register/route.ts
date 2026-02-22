@@ -58,6 +58,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Convert username to lowercase for consistency
+    const usernameLower = username.toLowerCase()
+
     // Validate password strength
     const passwordValidation = validatePassword(password)
     if (!passwordValidation.isValid) {
@@ -83,9 +86,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if username already exists
-    if (username) {
+    if (usernameLower) {
       const existingUsername = await prisma.user.findUnique({
-        where: { username: username }
+        where: { username: usernameLower }
       })
       if (existingUsername) {
         return NextResponse.json(
@@ -142,7 +145,7 @@ export async function POST(request: NextRequest) {
         country,
         city,
         address,
-        username: username,
+        username: usernameLower,
         role: createShop ? 'SELLER' : 'BUYER',
         isVerified: false,
         verifyToken,

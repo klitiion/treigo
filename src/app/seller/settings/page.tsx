@@ -565,7 +565,6 @@ function SellerSettings() {
                         [pref.key]: e.target.checked,
                       })
                     }
-                    className="w-5 h-5 rounded border-gray-300 text-black cursor-pointer"
                   />
                   <div>
                     <p className="font-semibold text-black">{pref.label}</p>

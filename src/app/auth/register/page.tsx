@@ -14,42 +14,152 @@ const countries = [
   { code: 'BA', name: 'Bosnia and Herzegovina' },
 ]
 
-// Format phone number to +355 69 xxxx xxxx format
-const formatPhoneNumber = (phone: string): string => {
+// Format phone number based on country
+const formatPhoneNumber = (phone: string, countryCode: string): string => {
   const cleaned = phone.replace(/\D/g, '')
   
-  if (cleaned.startsWith('355')) {
-    const last10 = cleaned.slice(3)
-    if (last10.length === 9 && last10.startsWith('69')) {
-      return `+355 ${last10.slice(0, 2)} ${last10.slice(2, 6)} ${last10.slice(6)}`
+  // Albania
+  if (countryCode === 'AL') {
+    if (cleaned.startsWith('355')) {
+      const last10 = cleaned.slice(3)
+      if (last10.length === 9 && last10.startsWith('69')) {
+        return `+355 ${last10.slice(0, 2)} ${last10.slice(2, 6)} ${last10.slice(6)}`
+      }
+    }
+    if (cleaned.startsWith('069')) {
+      return `+355 ${cleaned.slice(1, 3)} ${cleaned.slice(3, 7)} ${cleaned.slice(7)}`
+    }
+    if (cleaned.startsWith('69')) {
+      return `+355 ${cleaned.slice(0, 2)} ${cleaned.slice(2, 6)} ${cleaned.slice(6)}`
     }
   }
   
-  if (cleaned.startsWith('069')) {
-    return `+355 ${cleaned.slice(1, 3)} ${cleaned.slice(3, 7)} ${cleaned.slice(7)}`
+  // Kosovo: Format as +383 XX XXX XXXX
+  if (countryCode === 'XK') {
+    let number = cleaned
+    if (cleaned.startsWith('383')) {
+      number = cleaned.slice(3)
+    } else if (cleaned.startsWith('044') || cleaned.startsWith('049')) {
+      number = cleaned.slice(1)
+    }
+    if (number.length >= 8) {
+      return `+383 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`
+    }
   }
   
-  if (cleaned.startsWith('69')) {
-    return `+355 ${cleaned.slice(0, 2)} ${cleaned.slice(2, 6)} ${cleaned.slice(6)}`
+  // Serbia: Format as +381 XX XXX XXXX
+  if (countryCode === 'RS') {
+    let number = cleaned
+    if (cleaned.startsWith('381')) {
+      number = cleaned.slice(3)
+    }
+    if (number.length >= 8) {
+      return `+381 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`
+    }
+  }
+  
+  // Montenegro: Format as +382 XX XXX XXX
+  if (countryCode === 'ME') {
+    let number = cleaned
+    if (cleaned.startsWith('382')) {
+      number = cleaned.slice(3)
+    }
+    if (number.length >= 8) {
+      return `+382 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`
+    }
+  }
+  
+  // North Macedonia: Format as +389 XX XXX XXX
+  if (countryCode === 'MK') {
+    let number = cleaned
+    if (cleaned.startsWith('389')) {
+      number = cleaned.slice(3)
+    }
+    if (number.length >= 8) {
+      return `+389 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`
+    }
+  }
+  
+  // Bosnia and Herzegovina: Format as +387 XX XXX XXX
+  if (countryCode === 'BA') {
+    let number = cleaned
+    if (cleaned.startsWith('387')) {
+      number = cleaned.slice(3)
+    }
+    if (number.length >= 8) {
+      return `+387 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`
+    }
   }
   
   return phone
 }
 
-// Validate Albanian phone number
-const isValidAlbanianPhone = (phone: string): boolean => {
+// Phone validation by country
+const isValidPhoneNumber = (phone: string, countryCode: string): boolean => {
   const cleaned = phone.replace(/\D/g, '')
   
-  if (cleaned.startsWith('355')) {
-    const last10 = cleaned.slice(3)
-    return last10.length === 9 && last10.startsWith('69')
+  // Albania: 355 + 9 digits starting with 69, or 069...
+  if (countryCode === 'AL') {
+    if (cleaned.startsWith('355')) {
+      const lastPart = cleaned.slice(3)
+      return lastPart.length === 9 && lastPart.startsWith('69')
+    }
+    if (cleaned.startsWith('069') || cleaned.startsWith('69')) {
+      return cleaned.length === 10 || cleaned.length === 9
+    }
+    return false
   }
   
-  if (cleaned.startsWith('069') || cleaned.startsWith('69')) {
-    return cleaned.length === 10 || cleaned.length === 9
+  // Kosovo: 383 + 9 digits (starting with 4 or 9)
+  if (countryCode === 'XK') {
+    if (cleaned.startsWith('383')) {
+      const lastPart = cleaned.slice(3)
+      return lastPart.length === 8 || lastPart.length === 9
+    }
+    if (cleaned.startsWith('044') || cleaned.startsWith('049')) {
+      return cleaned.length === 9 || cleaned.length === 10
+    }
+    return cleaned.length === 9 && /^[49]/.test(cleaned)
   }
   
-  return false
+  // Serbia: 381 + 9-10 digits
+  if (countryCode === 'RS') {
+    if (cleaned.startsWith('381')) {
+      const lastPart = cleaned.slice(3)
+      return lastPart.length >= 8 && lastPart.length <= 10
+    }
+    return cleaned.length >= 9 && cleaned.length <= 11
+  }
+  
+  // Montenegro: 382 + 8-9 digits
+  if (countryCode === 'ME') {
+    if (cleaned.startsWith('382')) {
+      const lastPart = cleaned.slice(3)
+      return lastPart.length === 8 || lastPart.length === 9
+    }
+    return cleaned.length === 8 || cleaned.length === 9
+  }
+  
+  // North Macedonia: 389 + 8-9 digits
+  if (countryCode === 'MK') {
+    if (cleaned.startsWith('389')) {
+      const lastPart = cleaned.slice(3)
+      return lastPart.length === 8 || lastPart.length === 9
+    }
+    return cleaned.length === 8 || cleaned.length === 9
+  }
+  
+  // Bosnia and Herzegovina: 387 + 8-9 digits
+  if (countryCode === 'BA') {
+    if (cleaned.startsWith('387')) {
+      const lastPart = cleaned.slice(3)
+      return lastPart.length === 8 || lastPart.length === 9
+    }
+    return cleaned.length === 8 || cleaned.length === 9
+  }
+  
+  // Fallback: accept any phone number with at least 7 digits
+  return cleaned.length >= 7
 }
 
 interface PlacePrediction {
@@ -268,8 +378,8 @@ function RegisterForm() {
       setError('Phone number is required')
       return false
     }
-    if (!isValidAlbanianPhone(formData.phone)) {
-      setError('Phone number must be in format 069 or +355 69')
+    if (!isValidPhoneNumber(formData.phone, formData.country)) {
+      setError(`Phone number format invalid for ${countries.find(c => c.code === formData.country)?.name || 'selected country'}`)
       return false
     }
     if (!formData.city.trim()) {
@@ -314,7 +424,7 @@ function RegisterForm() {
     setIsLoading(true)
 
     try {
-      const formattedPhone = formatPhoneNumber(formData.phone)
+      const formattedPhone = formatPhoneNumber(formData.phone, formData.country)
       
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -614,7 +724,15 @@ function RegisterForm() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Phone number (069 or +355)"
+              placeholder={
+                formData.country === 'AL' ? 'Phone number (069 or +355 69)' :
+                formData.country === 'XK' ? 'Phone number (+383 or 044/049)' :
+                formData.country === 'RS' ? 'Phone number (+381)' :
+                formData.country === 'ME' ? 'Phone number (+382)' :
+                formData.country === 'MK' ? 'Phone number (+389)' :
+                formData.country === 'BA' ? 'Phone number (+387)' :
+                'Phone number'
+              }
               className="w-full px-4 py-3 border-2 border-black font-medium text-sm"
               required
             />
@@ -704,17 +822,11 @@ function RegisterForm() {
             {/* Shop Creation Checkbox */}
             <div className="border-2 border-black p-4 space-y-4">
               <label className="flex items-center gap-3 cursor-pointer">
-                <div className="relative flex-shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={wantShop}
-                    onChange={(e) => setWantShop(e.target.checked)}
-                    className="w-3.5 h-3.5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors rounded-none"
-                  />
-                  {wantShop && (
-                    <Check className="w-2.5 h-2.5 text-white absolute top-0.25 left-0.25 pointer-events-none" />
-                  )}
-                </div>
+                <input
+                  type="checkbox"
+                  checked={wantShop}
+                  onChange={(e) => setWantShop(e.target.checked)}
+                />
                 <span className="text-sm font-medium leading-tight">
                   I want to create a shop to sell items
                 </span>
@@ -745,19 +857,14 @@ function RegisterForm() {
 
             {/* Terms Checkbox */}
             <label className="flex items-start gap-3 cursor-pointer">
-              <div className="relative flex-shrink-0 pt-0.5">
-                <input
-                  type="checkbox"
-                  name="acceptTerms"
-                  checked={formData.acceptTerms}
-                  onChange={handleChange}
-                  className="w-3.5 h-3.5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors rounded-none"
-                  required
-                />
-                {formData.acceptTerms && (
-                  <Check className="w-2.5 h-2.5 text-white absolute top-0.25 left-0.25 pointer-events-none" />
-                )}
-              </div>
+              <input
+                type="checkbox"
+                name="acceptTerms"
+                checked={formData.acceptTerms}
+                onChange={handleChange}
+                required
+                style={{ marginTop: '2px' }}
+              />
               <span className="text-xs text-gray-700 leading-tight">
                 I accept the{' '}
                 <Link href="/terms" className="text-black font-bold hover:underline">
@@ -772,18 +879,12 @@ function RegisterForm() {
 
             {/* Marketing Checkbox */}
             <label className="flex items-center gap-3 cursor-pointer">
-              <div className="relative flex-shrink-0">
-                <input
-                  type="checkbox"
-                  name="acceptsMarketing"
-                  checked={formData.acceptsMarketing}
-                  onChange={handleChange}
-                  className="w-3.5 h-3.5 cursor-pointer appearance-none border-2 border-black checked:bg-black transition-colors rounded-none"
-                />
-                {formData.acceptsMarketing && (
-                  <Check className="w-2.5 h-2.5 text-white absolute top-0.25 left-0.25 pointer-events-none" />
-                )}
-              </div>
+              <input
+                type="checkbox"
+                name="acceptsMarketing"
+                checked={formData.acceptsMarketing}
+                onChange={handleChange}
+              />
               <span className="text-xs text-gray-700">
                 Send me news and updates
               </span>

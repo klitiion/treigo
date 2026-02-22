@@ -910,7 +910,7 @@ function BuyerProfile() {
                             type="checkbox"
                             checked={preferences[key as keyof NotificationPreferences]}
                             onChange={(e) => setPreferences(prev => ({ ...prev, [key]: e.target.checked }))}
-                            className="mt-1 w-5 h-5 border-black"
+                            style={{ marginTop: '2px' }}
                           />
                           <div className="flex-1">
                             <p className="font-bold text-black uppercase text-xs tracking-wide">{label}</p>

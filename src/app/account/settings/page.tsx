@@ -639,7 +639,7 @@ export default function ProfileSettingsPage() {
                               ...preferences,
                               [item.key]: e.target.checked
                             })}
-                            className="w-5 h-5 mt-1 border-2 border-gray-300 rounded cursor-pointer"
+                            style={{ marginTop: '2px' }}
                           />
                           <div className="flex-1">
                             <p className="font-bold text-black uppercase tracking-wide text-sm">{item.label}</p>
@@ -661,7 +661,7 @@ export default function ProfileSettingsPage() {
                           ...preferences,
                           pushNotifications: e.target.checked
                         })}
-                        className="w-5 h-5 mt-1 border-2 border-gray-300 rounded cursor-pointer"
+                        style={{ marginTop: '2px' }}
                       />
                       <div className="flex-1">
                         <p className="font-bold text-black uppercase tracking-wide text-sm">IN-APP NOTIFICATIONS</p>

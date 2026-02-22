@@ -57,21 +57,56 @@ export function Header() {
     const savedLanguage = (localStorage.getItem('site_language') || 'en') as 'en' | 'it' | 'fr'
     setLanguage(savedLanguage)
     
-    // Initialize Google Translate
-    const googleTranslateScript = document.createElement('script')
-    googleTranslateScript.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
-    document.head.appendChild(googleTranslateScript)
+    // Initialize Google Translate after a short delay
+    const initTranslate = () => {
+      if ((window as any).google?.translate?.TranslateElement) {
+        try {
+          new (window as any).google.translate.TranslateElement(
+            {
+              pageLanguage: 'en',
+              includedLanguages: 'en,it,fr',
+              layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+            },
+            'google_translate_element'
+          )
+          console.log('Google Translate initialized successfully')
+          
+          // If a language was saved, apply it
+          if (savedLanguage !== 'en') {
+            setTimeout(() => {
+              const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement
+              if (selectElement) {
+                selectElement.value = savedLanguage
+                selectElement.dispatchEvent(new Event('change', { bubbles: true }))
+              }
+            }, 500)
+          }
+        } catch (error) {
+          console.error('Error initializing Google Translate:', error)
+        }
+      } else {
+        // Google Translate not ready yet, try again
+        if (!(window as any).googleTranslateInitAttempts) {
+          (window as any).googleTranslateInitAttempts = 0
+        }
+        if ((window as any).googleTranslateInitAttempts < 10) {
+          (window as any).googleTranslateInitAttempts++
+          setTimeout(initTranslate, 500)
+        }
+      }
+    }
     
-    // Set up Google Translate callback
-    ;(window as any).googleTranslateElementInit = function() {
-      ;(window as any).google?.translate?.TranslateElement(
-        {
-          pageLanguage: 'en',
-          includedLanguages: 'en,it,fr',
-          autoDisplay: false
-        },
-        'google_translate_element'
-      )
+    // Load the Google Translate script
+    if (!(window as any).google?.translate) {
+      const script = document.createElement('script')
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=initGoogleTranslate'
+      script.async = true
+      document.head.appendChild(script)
+      
+      // Set up global callback
+      ;(window as any).initGoogleTranslate = initTranslate
+    } else {
+      initTranslate()
     }
   }, [])
 
@@ -234,7 +269,21 @@ export function Header() {
                       setLanguage('en')
                       localStorage.setItem('site_language', 'en')
                       setIsLanguageDropdownOpen(false)
-                      ;(window as any).google?.translate?.TranslateElement?.()
+                      // Trigger Google Translate
+                      setTimeout(() => {
+                        try {
+                          const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement
+                          if (selectElement) {
+                            selectElement.value = 'en'
+                            selectElement.dispatchEvent(new Event('change', { bubbles: true }))
+                            selectElement.dispatchEvent(new Event('click', { bubbles: true }))
+                          } else {
+                            console.warn('Google Translate combo not found')
+                          }
+                        } catch (error) {
+                          console.error('Error changing language:', error)
+                        }
+                      }, 100)
                     }}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                   >
@@ -245,7 +294,21 @@ export function Header() {
                       setLanguage('it')
                       localStorage.setItem('site_language', 'it')
                       setIsLanguageDropdownOpen(false)
-                      ;(window as any).google?.translate?.TranslateElement?.()
+                      // Trigger Google Translate
+                      setTimeout(() => {
+                        try {
+                          const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement
+                          if (selectElement) {
+                            selectElement.value = 'it'
+                            selectElement.dispatchEvent(new Event('change', { bubbles: true }))
+                            selectElement.dispatchEvent(new Event('click', { bubbles: true }))
+                          } else {
+                            console.warn('Google Translate combo not found')
+                          }
+                        } catch (error) {
+                          console.error('Error changing language:', error)
+                        }
+                      }, 100)
                     }}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                   >
@@ -256,7 +319,21 @@ export function Header() {
                       setLanguage('fr')
                       localStorage.setItem('site_language', 'fr')
                       setIsLanguageDropdownOpen(false)
-                      ;(window as any).google?.translate?.TranslateElement?.()
+                      // Trigger Google Translate
+                      setTimeout(() => {
+                        try {
+                          const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement
+                          if (selectElement) {
+                            selectElement.value = 'fr'
+                            selectElement.dispatchEvent(new Event('change', { bubbles: true }))
+                            selectElement.dispatchEvent(new Event('click', { bubbles: true }))
+                          } else {
+                            console.warn('Google Translate combo not found')
+                          }
+                        } catch (error) {
+                          console.error('Error changing language:', error)
+                        }
+                      }, 100)
                     }}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                   >
@@ -597,8 +674,16 @@ export function Header() {
         />
       )}
       
-      {/* Hidden Google Translate Widget */}
-      <div id="google_translate_element" style={{ display: 'none' }}></div>
+      {/* Google Translate Widget - Hidden but functional */}
+      <div 
+        id="google_translate_element" 
+        style={{ 
+          position: 'absolute',
+          left: '-9999px',
+          top: '-9999px',
+          visibility: 'hidden'
+        }}
+      ></div>
     </header>
   )
 }

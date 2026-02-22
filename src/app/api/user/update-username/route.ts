@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockUsersDatabase, findUserByEmail, updateUser } from '@/lib/mockUsers'
+import prisma from '@/lib/prisma'
 import { validateUsername } from '@/lib/bannedWords'
 
 export async function POST(request: NextRequest) {
@@ -16,10 +16,12 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[DEBUG] Update username - Email: ${email}, Username: ${username}`)
-    console.log(`[DEBUG] Users in database:`, mockUsersDatabase.map(u => u.email))
 
-    // Find user by email
-    const user = findUserByEmail(email)
+    // Find user by email in Prisma
+    const user = await prisma.user.findUnique({
+      where: { email }
+    })
+
     console.log(`[DEBUG] User found:`, user ? `${user.email}` : 'NOT FOUND')
     
     if (!user) {
@@ -52,11 +54,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if username is already taken
-    const isUsernameTaken = mockUsersDatabase.some(
-      u => u.username.toLowerCase() === username.toLowerCase()
-    )
+    const existingUser = await prisma.user.findUnique({
+      where: { username: username.toLowerCase() }
+    })
 
-    if (isUsernameTaken) {
+    if (existingUser) {
       return NextResponse.json(
         { 
           error: 'This username is already taken. Please choose another one.'
@@ -66,9 +68,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user's username and set usernameChangedAt timestamp
-    const updatedUser = updateUser(email, {
-      username: username,
-      usernameChangedAt: new Date()
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        username: username.toLowerCase(),
+        usernameChangedAt: new Date()
+      }
     })
 
     if (!updatedUser) {
