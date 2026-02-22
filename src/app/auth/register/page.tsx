@@ -212,23 +212,33 @@ function RegisterForm() {
       const script = document.createElement('script')
       script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAm84VWx-I7RepRrlQWR-yjcNbrzZLd-cM&libraries=places&language=en`
       script.async = true
-      script.defer = true
-      document.head.appendChild(script)
-      
       script.onload = () => {
-        console.log('Google Maps script loaded')
-        if ((window as any).google) {
-          placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
-          console.log('AutocompleteService initialized:', placesServiceRef.current)
-        }
+        // Wait a bit for the script to fully initialize
+        setTimeout(() => {
+          try {
+            if ((window as any).google?.maps?.places?.AutocompleteService) {
+              placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
+              console.log('AutocompleteService initialized successfully')
+            } else {
+              console.warn('Google Maps Places not available after script load')
+            }
+          } catch (err) {
+            console.error('Error initializing AutocompleteService:', err)
+          }
+        }, 100)
       }
       
       script.onerror = () => {
         console.error('Failed to load Google Maps script')
       }
-    } else if ((window as any).google && !placesServiceRef.current) {
-      console.log('Google maps already loaded, initializing AutocompleteService')
-      placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
+      document.head.appendChild(script)
+    } else if ((window as any).google?.maps?.places && !placesServiceRef.current) {
+      try {
+        placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
+        console.log('AutocompleteService initialized from existing Google object')
+      } catch (err) {
+        console.error('Error initializing AutocompleteService from existing Google:', err)
+      }
     }
   }, [])
 
