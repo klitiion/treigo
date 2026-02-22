@@ -142,28 +142,43 @@ function RegisterForm() {
     try {
       console.log('Fetching address predictions for:', value, 'Country:', formData.country)
       
-      const predictions = await placesServiceRef.current.getPlacePredictions({
+      const request: any = {
         input: value,
-        componentRestrictions: {
-          country: formData.country.toLowerCase()
+      }
+      
+      // Only add country restriction if country is not empty
+      if (formData.country && formData.country !== '') {
+        request.componentRestrictions = {
+          country: formData.country.toLowerCase() === 'xk' ? 'xk' : (formData.country.toLowerCase() === 'al' ? 'al' : formData.country.toLowerCase())
         }
-      })
+      }
+
+      const predictions = await placesServiceRef.current.getPlacePredictions(request)
 
       console.log('Predictions response:', predictions)
 
-      if (predictions && Array.isArray(predictions)) {
-        setAddressSuggestions(predictions)
-        setShowSuggestions(predictions.length > 0)
-      } else if (predictions && predictions.predictions && Array.isArray(predictions.predictions)) {
-        setAddressSuggestions(predictions.predictions)
-        setShowSuggestions(predictions.predictions.length > 0)
+      let results = []
+      
+      // Handle different response formats
+      if (Array.isArray(predictions)) {
+        results = predictions
+      } else if (predictions && Array.isArray(predictions.predictions)) {
+        results = predictions.predictions
+      } else if (predictions && predictions.length) {
+        results = Array.from(predictions)
+      }
+
+      if (results && results.length > 0) {
+        setAddressSuggestions(results as any)
+        setShowSuggestions(true)
       } else {
-        console.warn('Unexpected predictions response:', predictions)
+        console.warn('No predictions found for input:', value)
         setAddressSuggestions([])
         setShowSuggestions(false)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching address predictions:', err)
+      console.error('Error details:', err?.message || 'Unknown error')
       setAddressSuggestions([])
       setShowSuggestions(false)
     } finally {
