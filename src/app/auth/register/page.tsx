@@ -429,24 +429,40 @@ function RegisterForm() {
     setError('')
     setShowDuplicateAlert(false)
 
-    if (!validateForm()) return
+    console.log('[FORM] Validation starting...')
+    console.log('[FORM] Current formData:', formData)
+    console.log('[FORM] Password validation:', passwordValidation)
 
+    if (!validateForm()) {
+      console.log('[FORM] Validation failed, returning early')
+      return
+    }
+
+    console.log('[FORM] Validation passed')
     setIsLoading(true)
 
     try {
       const formattedPhone = formatPhoneNumber(formData.phone, formData.country)
+      console.log('[FORM] Original phone:', formData.phone)
+      console.log('[FORM] Formatted phone:', formattedPhone)
+      
+      const payload = {
+        ...formData,
+        phone: formattedPhone,
+        createShop: wantShop,
+      }
+      console.log('[FORM] Sending payload:', JSON.stringify(payload, null, 2))
       
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          phone: formattedPhone,
-          createShop: wantShop,
-        }),
+        body: JSON.stringify(payload),
       })
 
+      console.log('[FORM] Response status:', response.status)
+      
       const data = await response.json()
+      console.log('[FORM] Response data:', data)
 
       if (!response.ok) {
         if (response.status === 409) {
@@ -465,6 +481,7 @@ function RegisterForm() {
       setRegisteredEmail(data.email)
       setSuccess(true)
     } catch (err) {
+      console.error('[FORM] Catch error:', err)
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setIsLoading(false)
