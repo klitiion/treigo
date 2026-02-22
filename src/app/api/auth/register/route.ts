@@ -134,7 +134,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user in database
-    console.log('[REGISTER] Creating user in database')
+    console.log('[REGISTER] Creating user in database with data:', {
+      email: email.toLowerCase(),
+      firstName,
+      lastName,
+      phone,
+      country,
+      city,
+      address,
+      username: usernameLower,
+      role: createShop ? 'SELLER' : 'BUYER',
+      isVerified: false,
+      acceptsMarketing,
+    })
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
@@ -233,10 +245,25 @@ export async function POST(request: NextRequest) {
       console.error('[REGISTER] Prisma error meta:', prismaError.meta)
       console.error('[REGISTER] Prisma error message:', prismaError.message)
       detailedError = `Prisma error ${prismaError.code}: ${prismaError.message}`
+      
+      // P2002 is unique constraint violation
+      if (prismaError.code === 'P2002') {
+        const field = prismaError.meta?.target?.[0] || 'field'
+        if (field === 'email') {
+          errorMessage = 'This email is already registered'
+        } else if (field === 'username') {
+          errorMessage = 'This username is already taken'
+        } else {
+          errorMessage = `This ${field} is already in use`
+        }
+      }
     }
     
     // Return detailed error in development, generic in production
     const isDevelopment = process.env.NODE_ENV === 'development'
+    
+    console.error('[REGISTER] Final error message:', errorMessage)
+    console.error('[REGISTER] Detailed error:', detailedError)
     
     return NextResponse.json(
       { 
