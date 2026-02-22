@@ -100,17 +100,24 @@ function RegisterForm() {
   useEffect(() => {
     if (typeof window !== 'undefined' && !(window as any).google) {
       const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAm84VWx-I7RepRrlQWR-yjcNbrzZLd-cM&libraries=places`
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAm84VWx-I7RepRrlQWR-yjcNbrzZLd-cM&libraries=places&language=en`
       script.async = true
       script.defer = true
       document.head.appendChild(script)
       
       script.onload = () => {
+        console.log('Google Maps script loaded')
         if ((window as any).google) {
           placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
+          console.log('AutocompleteService initialized:', placesServiceRef.current)
         }
       }
+      
+      script.onerror = () => {
+        console.error('Failed to load Google Maps script')
+      }
     } else if ((window as any).google && !placesServiceRef.current) {
+      console.log('Google maps already loaded, initializing AutocompleteService')
       placesServiceRef.current = new (window as any).google.maps.places.AutocompleteService()
     }
   }, [])
@@ -126,10 +133,15 @@ function RegisterForm() {
       return
     }
 
-    if (!placesServiceRef.current) return
+    if (!placesServiceRef.current) {
+      console.warn('Google Places AutocompleteService not initialized')
+      return
+    }
 
     setLoadingAddressSuggestions(true)
     try {
+      console.log('Fetching address predictions for:', value, 'Country:', formData.country)
+      
       const predictions = await placesServiceRef.current.getPlacePredictions({
         input: value,
         componentRestrictions: {
@@ -137,12 +149,23 @@ function RegisterForm() {
         }
       })
 
-      if (predictions.predictions) {
+      console.log('Predictions response:', predictions)
+
+      if (predictions && Array.isArray(predictions)) {
+        setAddressSuggestions(predictions)
+        setShowSuggestions(predictions.length > 0)
+      } else if (predictions && predictions.predictions && Array.isArray(predictions.predictions)) {
         setAddressSuggestions(predictions.predictions)
-        setShowSuggestions(true)
+        setShowSuggestions(predictions.predictions.length > 0)
+      } else {
+        console.warn('Unexpected predictions response:', predictions)
+        setAddressSuggestions([])
+        setShowSuggestions(false)
       }
     } catch (err) {
       console.error('Error fetching address predictions:', err)
+      setAddressSuggestions([])
+      setShowSuggestions(false)
     } finally {
       setLoadingAddressSuggestions(false)
     }
@@ -651,6 +674,13 @@ function RegisterForm() {
                         </div>
                       </button>
                     ))}
+                  </div>
+                )}
+                
+                {/* No results message */}
+                {showSuggestions && addressSuggestions.length === 0 && !loadingAddressSuggestions && formData.address && (
+                  <div className="absolute top-full left-0 right-0 border-2 border-t-0 border-black bg-white z-50 px-4 py-3 text-xs text-gray-600">
+                    No addresses found. Try a different location.
                   </div>
                 )}
               </div>
