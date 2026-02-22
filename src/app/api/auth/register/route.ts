@@ -8,6 +8,26 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    // Log environment check
+    const hasDatabase = !!process.env.DATABASE_URL
+    console.log('[REGISTER] Environment check:', {
+      nodeEnv: process.env.NODE_ENV,
+      hasDatabaseUrl: hasDatabase,
+      databaseUrlPreview: hasDatabase ? process.env.DATABASE_URL?.substring(0, 30) + '...' : 'NOT SET',
+      hasResendKey: !!process.env.RESEND_API_KEY,
+    })
+
+    if (!hasDatabase) {
+      console.error('[REGISTER] CRITICAL: DATABASE_URL environment variable is not set!')
+      return NextResponse.json(
+        { 
+          error: 'Database connection not configured',
+          details: 'DATABASE_URL environment variable is missing'
+        },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { 
       email, 
@@ -72,10 +92,22 @@ export async function POST(request: NextRequest) {
 
     console.log('[REGISTER] Checking for existing user:', email)
     
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    })
+    let existingUser
+    try {
+      // Check if user already exists
+      existingUser = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() }
+      })
+    } catch (dbError) {
+      console.error('[REGISTER] Database query error when checking existing user:', dbError)
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed',
+          details: dbError instanceof Error ? dbError.message : 'Unable to connect to database'
+        },
+        { status: 500 }
+      )
+    }
 
     if (existingUser) {
       console.log('[REGISTER] User already exists:', email)
@@ -147,24 +179,37 @@ export async function POST(request: NextRequest) {
       isVerified: false,
       acceptsMarketing,
     })
-    const user = await prisma.user.create({
-      data: {
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        firstName,
-        lastName,
-        phone,
-        country,
-        city,
-        address,
-        username: usernameLower,
-        role: createShop ? 'SELLER' : 'BUYER',
-        isVerified: false,
-        verifyToken,
-        verifyExpires,
-        acceptsMarketing,
-      }
-    })
+    
+    let user
+    try {
+      user = await prisma.user.create({
+        data: {
+          email: email.toLowerCase(),
+          password: hashedPassword,
+          firstName,
+          lastName,
+          phone,
+          country,
+          city,
+          address,
+          username: usernameLower,
+          role: createShop ? 'SELLER' : 'BUYER',
+          isVerified: false,
+          verifyToken,
+          verifyExpires,
+          acceptsMarketing,
+        }
+      })
+    } catch (dbError) {
+      console.error('[REGISTER] Database error creating user:', dbError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to create account',
+          details: dbError instanceof Error ? dbError.message : 'Database error occurred'
+        },
+        { status: 500 }
+      )
+    }
 
     console.log('[REGISTER] User created successfully:', user.id, user.email, user.role)
 
