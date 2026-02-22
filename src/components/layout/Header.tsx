@@ -162,10 +162,10 @@ export function Header() {
           : 'bg-white border-b border-gray-100'
       }`}
     >
-      <div className="max-w-full">
-        <div className="flex items-center justify-between h-16 px-4 lg:px-8">
+      <div className="w-full">
+        <div className="flex items-center justify-between h-16 px-0">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 ml-6">
             <span className="text-xl lg:text-2xl font-900 tracking-tighter text-black">TRÈIGO</span>
           </Link>
 
@@ -251,7 +251,7 @@ export function Header() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4 mr-6">
             {/* Language Selector */}
             <div className="relative">
               <button
@@ -507,7 +507,7 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button 
-            className="lg:hidden p-2 text-gray-700 hover:text-black transition-colors"
+            className="lg:hidden p-2 text-gray-700 hover:text-black transition-colors mr-6"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
