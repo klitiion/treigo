@@ -67,6 +67,11 @@ select {
   border-radius: 8px;
 }
 
+/* Checkboxes - perfectly square, no rounding */
+input[type="checkbox"] {
+  border-radius: 0 !important;
+}
+
 /* Prevent double-tap zoom on mobile */
 @media (hover: none) and (pointer: coarse) {
   a, button, input, textarea, select, label {
