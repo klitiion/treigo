@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Menu, X, Search, User, ShoppingBag, Heart, Store, LogOut, ChevronDown, Plus, Gift, Settings, MessageSquare } from 'lucide-react'
+import { Menu, X, Search, User, ShoppingBag, Heart, Store, LogOut, ChevronDown, Plus, Gift, Settings, MessageSquare, Globe } from 'lucide-react'
 import { useWishlist } from '@/hooks/useWishlist'
 import { useCart } from '@/hooks/useCart'
 import { useCurrency } from '@/context/CurrencyContext'
@@ -34,6 +34,9 @@ export function Header() {
   const [mounted, setMounted] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isProductRequestOpen, setIsProductRequestOpen] = useState(false)
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false)
+  const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false)
+  const [language, setLanguage] = useState<'en' | 'it' | 'fr'>('en')
   const { wishlist } = useWishlist()
   const { getCartCount, isClient } = useCart()
   
@@ -49,6 +52,27 @@ export function Header() {
     // Load recent searches
     const saved = JSON.parse(localStorage.getItem('recent_searches') || '[]')
     setRecentSearches(saved)
+    
+    // Load language preference
+    const savedLanguage = (localStorage.getItem('site_language') || 'en') as 'en' | 'it' | 'fr'
+    setLanguage(savedLanguage)
+    
+    // Initialize Google Translate
+    const googleTranslateScript = document.createElement('script')
+    googleTranslateScript.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
+    document.head.appendChild(googleTranslateScript)
+    
+    // Set up Google Translate callback
+    ;(window as any).googleTranslateElementInit = function() {
+      ;(window as any).google?.translate?.TranslateElement(
+        {
+          pageLanguage: 'en',
+          includedLanguages: 'en,it,fr',
+          autoDisplay: false
+        },
+        'google_translate_element'
+      )
+    }
   }, [])
 
   useEffect(() => {
@@ -192,32 +216,88 @@ export function Header() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-6">
-            {/* Currency Toggle */}
-            {mounted && (
-              <div className="border-2 border-black rounded-none flex items-center">
-                <button
-                  onClick={() => setCurrency('EUR')}
-                  className={`px-3 py-1 text-xs font-900 uppercase tracking-wide transition-colors ${
-                    currency === 'EUR' 
-                      ? 'bg-black text-white' 
-                      : 'text-black hover:bg-gray-100'
-                  }`}
-                >
-                  EUR
-                </button>
-                <button
-                  onClick={() => setCurrency('ALL')}
-                  className={`px-3 py-1 text-xs font-900 uppercase tracking-wide transition-colors border-l-2 border-black ${
-                    currency === 'ALL' 
-                      ? 'bg-black text-white' 
-                      : 'text-black hover:bg-gray-100'
-                  }`}
-                >
-                  ALL
-                </button>
-              </div>
-            )}
+          <div className="hidden lg:flex items-center gap-4">
+            {/* Language Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
+                className="flex items-center gap-1 px-3 py-2 text-xs font-600 text-black hover:bg-gray-100 transition-colors rounded border border-gray-300"
+              >
+                <Globe className="w-4 h-4" />
+                {language.toUpperCase()}
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              {isLanguageDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 shadow-lg rounded z-50 min-w-max">
+                  <button
+                    onClick={() => {
+                      setLanguage('en')
+                      localStorage.setItem('site_language', 'en')
+                      setIsLanguageDropdownOpen(false)
+                      ;(window as any).google?.translate?.TranslateElement?.()
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage('it')
+                      localStorage.setItem('site_language', 'it')
+                      setIsLanguageDropdownOpen(false)
+                      ;(window as any).google?.translate?.TranslateElement?.()
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  >
+                    Italiano
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage('fr')
+                      localStorage.setItem('site_language', 'fr')
+                      setIsLanguageDropdownOpen(false)
+                      ;(window as any).google?.translate?.TranslateElement?.()
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  >
+                    Français
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Currency Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
+                className="flex items-center gap-1 px-3 py-2 text-xs font-600 text-black hover:bg-gray-100 transition-colors rounded border border-gray-300"
+              >
+                {currency}
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              {isCurrencyDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 shadow-lg rounded z-50 min-w-max">
+                  <button
+                    onClick={() => {
+                      setCurrency('EUR')
+                      setIsCurrencyDropdownOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  >
+                    EUR (€)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCurrency('ALL')
+                      setIsCurrencyDropdownOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  >
+                    ALL (L)
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button 
               onClick={() => setIsSearchOpen(true)}
@@ -516,6 +596,9 @@ export function Header() {
           onClose={() => setIsProductRequestOpen(false)}
         />
       )}
+      
+      {/* Hidden Google Translate Widget */}
+      <div id="google_translate_element" style={{ display: 'none' }}></div>
     </header>
   )
 }
