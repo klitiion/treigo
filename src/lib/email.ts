@@ -1,10 +1,17 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend with API key
+const apiKey = process.env.RESEND_API_KEY
+console.log('[EMAIL INIT] RESEND_API_KEY length:', apiKey?.length || 0)
+
+const resend = new Resend(apiKey)
 
 const FROM_EMAIL = process.env.EMAIL_FROM || 'notify@treigo.eu'
 const VERIFICATION_EMAIL = process.env.VERIFICATION_EMAIL || 'sales@treigo.eu'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+console.log('[EMAIL CONFIG] FROM_EMAIL:', FROM_EMAIL)
+console.log('[EMAIL CONFIG] Using Resend SDK version:', 'resend')
 
 export async function sendVerificationEmail(
   email: string,
@@ -12,10 +19,23 @@ export async function sendVerificationEmail(
   verificationToken: string
 ) {
   try {
-    console.log('[EMAIL] Attempting to send verification email to:', email)
-    console.log('[EMAIL] RESEND_API_KEY set:', !!process.env.RESEND_API_KEY)
-    console.log('[EMAIL] FROM_EMAIL:', FROM_EMAIL)
+    console.log('[EMAIL] ========================================')
+    console.log('[EMAIL] STARTING VERIFICATION EMAIL SEND')
+    console.log('[EMAIL] ========================================')
+    console.log('[EMAIL] Recipient:', email)
+    console.log('[EMAIL] From:', FROM_EMAIL)
+    console.log('[EMAIL] Verification Token:', verificationToken)
+    console.log('[EMAIL] Resend API Key present:', !!process.env.RESEND_API_KEY)
     
+    if (!process.env.RESEND_API_KEY) {
+      console.error('[EMAIL] CRITICAL: RESEND_API_KEY is not set!')
+      return { 
+        success: false, 
+        error: 'Email service not configured - missing API key'
+      }
+    }
+    
+    console.log('[EMAIL] Calling resend.emails.send()...')
     const { data, error } = await resend.emails.send({
       from: `Trèigo <${FROM_EMAIL}>`,
       to: email,
@@ -80,15 +100,31 @@ export async function sendVerificationEmail(
     })
 
     if (error) {
-      console.error('[EMAIL] Email send error:', error)
+      console.error('[EMAIL] ========================================')
+      console.error('[EMAIL] EMAIL SEND FAILED!')
+      console.error('[EMAIL] ========================================')
+      console.error('[EMAIL] Error object:', JSON.stringify(error, null, 2))
+      console.error('[EMAIL] Error type:', error?.constructor?.name)
+      if (error && typeof error === 'object') {
+        Object.entries(error).forEach(([key, value]) => {
+          console.error(`[EMAIL] ${key}:`, value)
+        })
+      }
       return { success: false, error }
     }
 
-    console.log('[EMAIL] Email sent successfully to:', email, 'Message ID:', data?.id)
+    console.log('[EMAIL] ========================================')
+    console.log('[EMAIL] EMAIL SENT SUCCESSFULLY!')
+    console.log('[EMAIL] ========================================')
+    console.log('[EMAIL] Message ID:', data?.id)
     return { success: true, data }
   } catch (error) {
-    console.error('[EMAIL] Email service error:', error)
+    console.error('[EMAIL] ========================================')
+    console.error('[EMAIL] EMAIL SENDING EXCEPTION!')
+    console.error('[EMAIL] ========================================')
+    console.error('[EMAIL] Error:', error)
     if (error instanceof Error) {
+      console.error('[EMAIL] Error name:', error.name)
       console.error('[EMAIL] Error message:', error.message)
       console.error('[EMAIL] Error stack:', error.stack)
     }
