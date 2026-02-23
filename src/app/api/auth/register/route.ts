@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 
     // Generate random verification token (6 digit code)
     const verifyToken = Math.floor(100000 + Math.random() * 900000).toString()
-    const verifyExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    const verifyExpires = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
 
     // Generate shop slug
     const generateShopSlug = (name: string) => {

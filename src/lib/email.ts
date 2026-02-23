@@ -12,6 +12,10 @@ export async function sendVerificationEmail(
   verificationToken: string
 ) {
   try {
+    console.log('[EMAIL] Attempting to send verification email to:', email)
+    console.log('[EMAIL] RESEND_API_KEY set:', !!process.env.RESEND_API_KEY)
+    console.log('[EMAIL] FROM_EMAIL:', FROM_EMAIL)
+    
     const { data, error } = await resend.emails.send({
       from: `Trèigo <${FROM_EMAIL}>`,
       to: email,
@@ -52,7 +56,7 @@ export async function sendVerificationEmail(
                     ${verificationToken}
                   </p>
                 </div>
-                <p style="color: #999999; font-size: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Code expires in 10 minutes</p>
+                <p style="color: #999999; font-size: 12px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Code expires in 15 minutes</p>
               </div>
               
               <div style="margin: 32px 0; padding: 24px; background: #f9f9f9; border-left: 4px solid #000000;">
@@ -76,13 +80,18 @@ export async function sendVerificationEmail(
     })
 
     if (error) {
-      console.error('Email send error:', error)
+      console.error('[EMAIL] Email send error:', error)
       return { success: false, error }
     }
 
+    console.log('[EMAIL] Email sent successfully to:', email, 'Message ID:', data?.id)
     return { success: true, data }
   } catch (error) {
-    console.error('Email service error:', error)
+    console.error('[EMAIL] Email service error:', error)
+    if (error instanceof Error) {
+      console.error('[EMAIL] Error message:', error.message)
+      console.error('[EMAIL] Error stack:', error.stack)
+    }
     return { success: false, error }
   }
 }

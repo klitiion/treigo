@@ -5,12 +5,19 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, code } = await request.json()
+    const { email, code, verifyToken } = await request.json()
+    
+    // Accept both 'code' and 'verifyToken' parameter names
+    const verificationCode = code || verifyToken
+
+    console.log('[VERIFY] Request received for email:', email)
+    console.log('[VERIFY] Verification code received:', verificationCode ? 'yes' : 'no')
 
     // Validate inputs
-    if (!email || !code) {
+    if (!email || !verificationCode) {
+      console.error('[VERIFY] Missing email or code')
       return NextResponse.json(
-        { error: 'Email and code are required' },
+        { error: 'Email and verification code are required' },
         { status: 400 }
       )
     }
@@ -45,7 +52,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if verification code matches
-    if (user.verifyToken !== code) {
+    if (user.verifyToken !== verificationCode) {
+      console.error('[VERIFY] Code mismatch for user:', user.id)
+      console.error('[VERIFY] Expected:', user.verifyToken)
+      console.error('[VERIFY] Got:', verificationCode)
       return NextResponse.json(
         { error: 'Invalid verification code' },
         { status: 400 }
@@ -53,15 +63,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if code has expired
-    if (!user.verifyExpires || new Date() > user.verifyExpires) {
+    if (!user.verifyExpires) {
+      console.error('[VERIFY] No expiry date set for user:', user.id)
       return NextResponse.json(
-        { error: 'Verification code has expired' },
+        { error: 'Verification code is invalid' },
         { status: 400 }
       )
     }
+    
+    const now = new Date()
+    if (now > user.verifyExpires) {
+      console.error('[VERIFY] Code expired. Current time:', now, 'Expires at:', user.verifyExpires)
+      return NextResponse.json(
+        { error: 'Verification code has expired. Please register again.' },
+        { status: 400 }
+      )
+    }
+    
+    console.log('[VERIFY] Code is valid and not expired')
 
     // Mark user as verified
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
         isVerified: true,
@@ -69,6 +91,8 @@ export async function POST(request: NextRequest) {
         verifyExpires: null
       }
     })
+
+    console.log('[VERIFY] User verified successfully:', updatedUser.id)
 
     return NextResponse.json({
       success: true,
