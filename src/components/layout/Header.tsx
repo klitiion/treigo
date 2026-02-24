@@ -251,9 +251,9 @@ export function Header() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-4 mr-6">
+          <div className="flex items-center gap-2 lg:gap-4 mr-6">
             {/* Language Selector */}
-            <div className="relative">
+            <div className="relative hidden lg:block">
               <button
                 onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
                 className="flex items-center gap-1 px-3 py-2 text-xs font-600 text-black hover:bg-gray-100 transition-colors rounded border border-gray-300"
@@ -344,7 +344,7 @@ export function Header() {
             </div>
 
             {/* Currency Selector */}
-            <div className="relative">
+            <div className="relative hidden lg:block">
               <button
                 onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
                 className="flex items-center gap-1 px-3 py-2 text-xs font-600 text-black hover:bg-gray-100 transition-colors rounded border border-gray-300"
@@ -491,13 +491,13 @@ export function Header() {
               <>
                 <Link 
                   href="/auth/login" 
-                  className="px-4 py-2 text-sm font-500 text-gray-700 hover:text-black transition-colors"
+                  className="px-2 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-500 text-gray-700 hover:text-black transition-colors whitespace-nowrap"
                 >
                   Sign In
                 </Link>
                 <Link 
                   href="/auth/register" 
-                  className="px-4 py-2 bg-black text-white text-sm font-600 rounded-none hover:bg-gray-900 transition-colors"
+                  className="px-2 lg:px-4 py-1.5 lg:py-2 bg-black text-white text-xs lg:text-sm font-600 rounded-none hover:bg-gray-900 transition-colors whitespace-nowrap"
                 >
                   Join
                 </Link>
